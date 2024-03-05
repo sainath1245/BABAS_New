@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "27850124687",
+    "project_id": "babas-app-e5989",
+    "storage_bucket": "babas-app-e5989.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27850124687:android:a836849c700b030d296ffa",
+        "android_client_info": {
+          "package_name": "com.babas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "27850124687-b00rbsv0ou8j8tmev7gh57ovaqb3sg27.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDruXLwXk6kMbJcFmvc5nynfEpfap9YG90"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "27850124687-b00rbsv0ou8j8tmev7gh57ovaqb3sg27.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

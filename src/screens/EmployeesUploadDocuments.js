@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    Image, Keyboard, StatusBar,
-    Text,
-    TextInput,
-    TouchableNativeFeedback,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  Image, Keyboard,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableNativeFeedback,
+  TouchableOpacity,
+  View,
+  Platform,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KeyboardAwareScrollView } from '@codler/react-native-keyboard-aware-scroll-view';
@@ -31,6 +33,7 @@ import { BASE_URL } from '../utils/consts';
 import { insertClock } from '../../database/local_database';
 import notificationStore from '../../notification_redux/notificationStore';
 import ViewShot from "react-native-view-shot";
+// import {useTimer} from '../utils/SessionContext';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 
@@ -47,6 +50,7 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
     const [attendanceType, setAttendanceType] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isBtnClicked, setBtnClicked] = useState(false);
+    // const [exactDateInUpload, setExactDateInUpload] = useState('');
 
     var notificationCount = notificationStore.getState().count;
     const { token, datetime, date, time, lat, lng, clockType, branch } = route.params;
@@ -63,6 +67,10 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
     var height = Dimensions.get('window').height;
 
     const ref = useRef();
+//   const {timer, stopTimer, sessionExpired} = useTimer();
+//   const [appState, setAppState] = useState(AppState.currentState);
+  const [userData, setUserData] = useState([]);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
     useEffect(() => {
         // This function to get userId and userdata from local DB
@@ -101,6 +109,25 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
             );
         });
         checkInternet();
+        // const handleAppStateChange = (nextAppState) => {
+        //     if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        //     // App has returned from the background
+        //     console.log('App returned to foreground');
+        //     } else if (appState === 'active' && nextAppState.match(/inactive|background/)) {
+        //     // App has entered the background
+        //     console.log('App entered background');
+        //     // stopTimer();
+        //         }
+        //         setAppState(nextAppState);
+        //       };
+          
+        //       // Subscribe to app state changes
+        //       const subscription = AppState.addEventListener('change', handleAppStateChange);
+          
+        //       return () => {
+        //         // Unsubscribe from app state changes when component unmounts
+        //         subscription.remove();
+        //       };
     }, []);
 
     // This function is to capture the screenshot for the Image popup 
@@ -167,7 +194,6 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
             type: 'image/jpeg', //the mime type of the file
             name: date + time + 'image.jpg'
         }
-
         const data = new FormData()
         data.append("userID", number)
         data.append("longitude", lng)
@@ -251,6 +277,7 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                     height: 1200,
                                     cropping: false,
                                     quality: 0.7,
+                                    useFrontCamera: true,
                                 }).then(image => {
                                     console.log('==image==image==image==:: :: ' + JSON.stringify(image));
                                     console.log('==image==image==image==:: :: ' + image.path);
@@ -272,7 +299,8 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                     width: 900,
                                     height: 1200,
                                     cropping: false,
-                                    quality: 0.7
+                                    quality: 0.7,
+                                    useFrontCamera: true,
                                 }).then(image => {
                                     console.log('==image==image==image==:: :: ' + JSON.stringify(image));
                                     console.log('==image==image==image==:: :: ' + image.path);
@@ -370,6 +398,163 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
         setShop(value)
         setShopName(value)
     }
+    callApiToGetSrverTime = async item => {
+    // console.log('timer in Upload Docs...');
+    let timerDifferenceinSeconds = 0;
+        const requestOptions = {
+          method: 'GET',
+          headers: {
+            Authorization: 'Bearer ' + item,
+            'Content-Type': 'application/json',
+          },
+        };
+        await fetch(BASE_URL + 'Attendance/GetServerTime', requestOptions)
+          .then(response => {
+            console.log('====response.ok in upload=====' + response.ok);
+            if (response.ok) {
+              return response.json();
+            } else {
+              throw new Error('Something went wrong :: ' + response.status);
+            }
+          })
+          .then(data => {
+            let json = data;
+            let date = json.data.date;
+            // console.log('Timer data in upload---', datetime, json.data.exactDate);
+            // setExactDateInUpload(json.data.exactDate);
+            timerDifferenceinSeconds = getTimeDifferenceInSeconds(datetime, json.data.exactDate);
+            // console.log('time diff val --', timerDifferenceinSeconds);
+          })
+          .catch(error => {
+            // stopTimer();
+            console.log('==ERROR while fetching date and time in upload : ' + error);
+            
+          })
+          .finally(() => {
+            setLoading(false);
+            console.log('response got successfully in finally -- ',timerDifferenceinSeconds );
+            if (timerDifferenceinSeconds == 0) {
+                Alert.alert(
+                    "Alert!",
+                    "Something went wrong. Please try again.",
+                )
+            } else if (timerDifferenceinSeconds > 180) {
+                setSessionExpired(true);
+                showAlertWhenSessionExpired();
+            } else {
+                console.log('about to start upload from here...');
+                setLoading(true);
+                saveClockIn();
+            }
+          });
+      };
+      const showAlertWhenSessionExpired = () => {
+        Alert.alert(
+                    "Alert!",
+                    'Your Session expired. Please start Clock In / Clock Out again.',
+                    [
+                        {
+                            text: "Cancel",
+                            onPress: () => console.log("Cancel Pressed"),
+                            style: "cancel"
+                        },
+                        {
+                            text: "Ok",
+                            onPress: () => {
+                                console.log('session expired in upload documents', userData);
+                                if (userData.length > 0 ){
+                                    if (userData[0].userRole == 3) {
+                                        console.log('role - 3');
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [{
+                                                name: 'EmployeesHomeDrawer',
+                                                screen: "Home"
+                                            }],
+                                        });
+                                    } else if (userData[0].userRole == 2) {
+                                        console.log('role-2');
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [{
+                                                name: 'SuperVisorHomeDrawer',
+                                                screen: "Home"
+                                            }],
+                                        });
+                                    } else if (userData[0].userRole == 1) {
+                                        console.log('role-1');
+                                        navigation.reset({
+                                            index: 0,
+                                            routes: [{
+                                                name: 'AdminHomeDrawer',
+                                                screen: "AdminDashboard"
+                                            }],
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                )
+      }
+      //diff in timers before --', '2024-03-21 19:21:27.548', '2024-03-21 19:21:33.428'
+    function getTimeDifferenceInSeconds(time1, time2) {
+        if (Platform.OS === 'android') {
+        // Parse the time strings into Date objects
+        // console.log('diff in timers before getTime--', time1, time2);
+        // const date1 = new Date(time1).getTime();
+        // const date2 = new Date(time2).getTime();
+
+        let dateParam1 = time1.split(/[\s-:]/);
+        // console.log('diff dateparam2--', dateParam1);
+        dateParam1[1] = (parseInt(dateParam1[1], 10) - 1).toString();
+        // console.log('diff res of dateParam-1', dateParam1);
+        const finalVal1 =  new Date(...dateParam1);
+        // console.log('diff finalVal 1--', finalVal1);
+
+        let dateParam2 = time2.split(/[\s-:]/);
+        // console.log('diff dateparam2--', dateParam2);
+        dateParam2[1] = (parseInt(dateParam2[1], 10) - 1).toString();
+        // console.log('diff res of dateParam-2', dateParam2);
+        const finalVal2 =  new Date(...dateParam2);
+        // console.log('diff finalVal 2--', finalVal2);
+        const diffInMillSec = Math.abs(finalVal1 - finalVal2);
+        // console.log('diff in mill sec is --', diffInMillSec);
+        const diffInSec = parseInt(diffInMillSec / 1000);
+        console.log('Diff in Sec Andriod---', diffInSec);
+        // const date1 = new Date(time1.replace(/-/g, '/'));
+        // const date2 = new Date(time2.replace(/-/g, '/'));
+        // const date1 = new Date(time1).getTime();
+        // const date2 = new Date(time2).getTime();
+        // const date1 = new Date(`${time1}`).getTime();
+        // const date2 = new Date(`${time2}`).getTime();
+        // const date1 = new Date("2024-03-21 19:21:27.548");
+        // const date2 = new Date("2024-03-21 19:21:33.428");
+        // console.log('diff in two timmers - ', time1, time2);
+        // console.log('diff in before date1 and date2 are --', date1, date2);
+        //getting as Invalid Date for date1 and date2
+
+        // Calculate the difference in milliseconds
+        // const differenceMilliseconds = Math.abs(date1 - date2);
+    //   console.log('diff in mill secs', differenceMilliseconds);
+        // Convert difference to seconds
+        // const differenceSeconds = parseInt(differenceMilliseconds / 1000);
+        // console.log('diff in secs---', differenceSeconds);
+        return diffInSec;
+        } else {
+        const date1 = new Date(time1);
+        const date2 = new Date(time2);
+        // console.log('diff in two timmers - ', time1, time2);
+        // console.log('date1 and date2 are --', date1, date2);
+        // Calculate the difference in milliseconds
+        const differenceMilliseconds = Math.abs(date1 - date2);
+        // console.log('diff in mill secs', differenceMilliseconds);
+        // Convert difference to seconds
+        const differenceSeconds = parseInt(differenceMilliseconds / 1000);
+        console.log('diff in secs iOS---', differenceSeconds);
+        return differenceSeconds;
+        }
+      }
 
     // This function is to set the UI 
     return (
@@ -561,9 +746,66 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                 </View>
                                 <TouchableOpacity
                                     onPress={() => {
-                                        console.log("shopName :::: :::: " + shopName)
-                                        console.log("shopLocation :::::: ::: " + shopLocation)
+                                        // console.log("shopName :::: :::: " + shopName)
+                                        // console.log("shopLocation :::::: ::: " + shopLocation)
+                                        // console.log('status--', checkInternet());
+                                        // console.log('token in upload ---', token);
                                         Keyboard.dismiss();
+                                        if (sessionExpired) {
+                                            showAlertWhenSessionExpired();
+                                            return;
+                                        }
+                                        // callApiToGetSrverTime(token);
+                                        // if (sessionExpired) {
+                                        //     Alert.alert(
+                                        //         "Alert!",
+                                        //         'Your Session expired. Please start Clock In / Clock Out again',
+                                        //         [
+                                        //             {
+                                        //                 text: "Cancel",
+                                        //                 onPress: () => console.log("Cancel Pressed"),
+                                        //                 style: "cancel"
+                                        //             },
+                                        //             {
+                                        //                 text: "Ok",
+                                        //                 onPress: () => {
+                                        //                     console.log('session expired in upload documents', userData);
+                                        //                     if (userData.length > 0 ){
+                                        //                         if (userData[0].userRole == 3) {
+                                        //                             console.log('role - 3');
+                                        //                             navigation.reset({
+                                        //                                 index: 0,
+                                        //                                 routes: [{
+                                        //                                     name: 'EmployeesHomeDrawer',
+                                        //                                     screen: "Home"
+                                        //                                 }],
+                                        //                             });
+                                        //                         } else if (userData[0].userRole == 2) {
+                                        //                             console.log('role-2');
+                                        //                             navigation.reset({
+                                        //                                 index: 0,
+                                        //                                 routes: [{
+                                        //                                     name: 'SuperVisorHomeDrawer',
+                                        //                                     screen: "Home"
+                                        //                                 }],
+                                        //                             });
+                                        //                         } else if (userData[0].userRole == 1) {
+                                        //                             console.log('role-1');
+                                        //                             navigation.reset({
+                                        //                                 index: 0,
+                                        //                                 routes: [{
+                                        //                                     name: 'AdminHomeDrawer',
+                                        //                                     screen: "AdminDashboard"
+                                        //                                 }],
+                                        //                             });
+                                        //                         }
+                                        //                     }
+                                        //                 }
+                                        //             }
+                                        //         ]
+                                        //     )
+                                        //     return;
+                                        // }
                                         if (selectedValue !== 'Attendance Type') {
                                             if (shopName.length !== 0 && shopLocation.length !== 0 && remark.length !== 0) {
                                                 if (imageUri.length > 0) {
@@ -572,41 +814,46 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                                         setTimeout(() => {
                                                             setBtnClicked(false)
                                                         }, 2000);
-                                                        if (isConnected) {
-                                                            console.log('SOHEL')
+                                                        if (checkInternet()) {
                                                             setLoading(true);
-                                                            saveClockIn();
+                                                            callApiToGetSrverTime(token)
+                                                            // setLoading(true);
+                                                            // saveClockIn();
                                                         } else {
+                                                            // Alert.alert(
+                                                            //     "Alert!",
+                                                            //     "(Offline) No internet connection. Your request is currently saved in local device temporarily. Kindly submit your request when internet connection is available.",
+                                                            //     [
+                                                            //         {
+                                                            //             text: "Cancel",
+                                                            //             onPress: () => console.log("Cancel Pressed"),
+                                                            //             style: "cancel"
+                                                            //         },
+                                                            //         {
+                                                            //             text: "OK",
+                                                            //             onPress: () => {
+                                                            //                 var number = parseInt(userId);
+                                                            //                 // var imageData = {
+                                                            //                 //     uri: imageUri,
+                                                            //                 //     type: 'image/jpeg', //the mime type of the file
+                                                            //                 //     name: date + time + 'image.jpg'
+                                                            //                 // }
+                                                            //                 AsyncStorage.setItem('lastAction', clockType + '');
+                                                            //                 insertClock(db, number, lng, lat, date, time, datetime, clockType, selectedValueToSend, shopName, shopLocation, remark, imageUri_1)
+                                                            //                 navigation.reset({
+                                                            //                     index: 0,
+                                                            //                     routes: [{
+                                                            //                         name: "EmployeesSuccessMessage",
+                                                            //                         params: { requestID: 0 }
+                                                            //                     }],
+                                                            //                 });
+                                                            //             }
+                                                            //         }
+                                                            //     ]
+                                                            // )
                                                             Alert.alert(
                                                                 "Alert!",
-                                                                "(Offline) No internet connection. Your request is currently saved in local device temporarily. Kindly submit your request when internet connection is available.",
-                                                                [
-                                                                    {
-                                                                        text: "Cancel",
-                                                                        onPress: () => console.log("Cancel Pressed"),
-                                                                        style: "cancel"
-                                                                    },
-                                                                    {
-                                                                        text: "OK",
-                                                                        onPress: () => {
-                                                                            var number = parseInt(userId);
-                                                                            // var imageData = {
-                                                                            //     uri: imageUri,
-                                                                            //     type: 'image/jpeg', //the mime type of the file
-                                                                            //     name: date + time + 'image.jpg'
-                                                                            // }
-                                                                            AsyncStorage.setItem('lastAction', clockType + '');
-                                                                            insertClock(db, number, lng, lat, date, time, datetime, clockType, selectedValueToSend, shopName, shopLocation, remark, imageUri_1)
-                                                                            navigation.reset({
-                                                                                index: 0,
-                                                                                routes: [{
-                                                                                    name: "EmployeesSuccessMessage",
-                                                                                    params: { requestID: 0 }
-                                                                                }],
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                ]
+                                                                "The Clock In / Clock Out functionality is only available while connected to the internet.",
                                                             )
                                                         }
                                                     }
@@ -662,7 +909,7 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                     />
                                     <View style={{ width: '100%', padding: 10, bottom: 0, position: 'absolute', backgroundColor: 'black' }}>
                                         <Text style={{ fontSize: 14, color: 'white', fontFamily: 'OpenSans-Regular' }}>
-                                            {date + ' ' + time + '\n' + 'Latitude: ' + lat + '\n' + 'Longitude: ' + lng}
+                                            {date + ' ' + time + '\n' + 'Lat: ' + lat + '\n' + 'Long: ' + lng}
                                         </Text>
                                     </View>
                                 </View>

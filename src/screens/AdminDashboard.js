@@ -95,7 +95,7 @@ const AdminDashboard = ({ navigation }) => {
                 setLoading(false)
                 Alert.alert(
                     "Alert!",
-                    "(Offline) No internet connection. Clock In/Clock Out feature allow user to execute as normal.",
+                    "(Offline) No internet connection. Please check your internet connection and try again.",
                 )
             }
             setConnected(state.isConnected);

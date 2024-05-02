@@ -61,11 +61,8 @@ import SuperVisorEmpRequestes from '../screens/SuperVisorEmpRequestes';
 import SuperVisorHistory from '../screens/SuperVisorHistory';
 import SuperVisorHistoryDetail from '../screens/SuperVisorHistoryDetail';
 import SuperVisorHome from '../screens/SuperVisorHome';
-import { BASE_URL } from './consts';
-import {
-    EmployeesUploadDocumentsPageStyles,
-    loginPageStyles
-} from './styles';
+import {BASE_URL} from './consts';
+import {EmployeesUploadDocumentsPageStyles, loginPageStyles} from './styles';
 import DeviceInfo from 'react-native-device-info';
 import NonBabasLogin from "../screens/NonBabasLogin";
 import NonBabasDashboard from "../screens/NonBabasDashboard";
@@ -119,6 +116,15 @@ const CustomDrawerContent = (props) => {
         return (isConnected);
     }
 
+  const getAppVersion = () => {
+    let message = '';
+    if (BASE_URL == 'https://mobileapi-dev.babasap.com/api/') {
+      message = DeviceInfo.getVersion() + ' - QA';
+    } else {
+      message = DeviceInfo.getVersion();
+    }
+    return message;
+}
     // This function is to call logout API 
     callLogoutAPI = async (token) => {
         var number = parseInt(userId);
@@ -320,13 +326,13 @@ const CustomDrawerContent = (props) => {
                                     }
                                     console.log('======temp' + temp.length)
 
-                                    var message = '';
-                                    if (temp.length > 0) {
-                                        message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
-                                    } else {
-                                        message = 'Are you sure you want to Sign Out?'
-                                    }
-
+                                    // var message = '';
+                                    // if (temp.length > 0) {
+                                    //     message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
+                                    // } else {
+                                    //     message = 'Are you sure you want to Sign Out?'
+                                    // }
+                                    let message = 'Are you sure you want to Sign Out?'
                                     Alert.alert(
                                         "Alert!",
                                         message,
@@ -402,7 +408,7 @@ const CustomDrawerContent = (props) => {
                     {name}
                 </Text>
                 <Text style={{ fontFamily: 'OpenSans-Regular', bottom: 0, width: '100%', color: '#f0f0f0', fontSize: 14, marginTop: 6 }}>
-                    App version: {DeviceInfo.getVersion()}
+                    App version: {getAppVersion()}
                 </Text>
             </View>
         </DrawerContentScrollView>
@@ -422,6 +428,9 @@ const EmployeesHomeDrawer = () => {
 
     return (
         <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="EmployeesHome" screenOptions={{
+            // drawerType: 'back',
+            // drawerActiveBackgroundColor: 'yellow',
+            //https://www.youtube.com/watch?v=l8nY4Alk70Q
             drawerType: 'front',
             drawerStyle: {
                 backgroundColor: '#FA0F0A99',

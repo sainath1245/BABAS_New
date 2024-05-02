@@ -76,33 +76,33 @@ const Login = ({ navigation }) => {
         // console.log('formattedDate_1 ::: ' + formattedDate_1)
     }, [])
 
-    callAPITest = async () => {
-        var requestOptions = '';
-        requestOptions = {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'  // I added this line
-            },
-        };
-        await fetch('https://reqres.in/api/users?page=2',
-            requestOptions)
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong');
-                }
-            })
-            .then((data) => {
-                console.log('==== EMAIL==== ' + JSON.stringify(data));
-            })
-            .catch((error) => {
-                console.log('=== ERROR === : ' + error)
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }
+    // callAPITest = async () => {
+    //     var requestOptions = '';
+    //     requestOptions = {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json'  // I added this line
+    //         },
+    //     };
+    //     await fetch('https://reqres.in/api/users?page=2',
+    //         requestOptions)
+    //         .then(response => {
+    //             if (response.ok) {
+    //                 return response.json();
+    //             } else {
+    //                 throw new Error('Something went wrong');
+    //             }
+    //         })
+    //         .then((data) => {
+    //             console.log('==== EMAIL==== ' + JSON.stringify(data));
+    //         })
+    //         .catch((error) => {
+    //             console.log('=== ERROR === : ' + error)
+    //         })
+    //         .finally(() => {
+    //             setLoading(false);
+    //         });
+    // }
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
     const checkInternet = () => {

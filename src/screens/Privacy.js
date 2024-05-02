@@ -63,3 +63,13 @@ const Privacy = ({ navigation }) => {
 };
 
 export default Privacy;
+
+/* 
+onError={(event) => {
+                        console.log('event error---', event);
+                        Alert.alert(
+                            "Alert!",
+                            "(Offline) No internet connection. Please try again later.",
+                        )
+                    }}
+*/

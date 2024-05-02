@@ -126,7 +126,7 @@ const SuperVisorHome = ({ navigation }) => {
                         } else {
                             Alert.alert(
                                 "Alert!",
-                                "(Offline) No internet connection. Clock In/Clock Out feature allow user to execute as normal.",
+                                "(Offline) No internet connection. Clock In/Clock Out feature will not allow user to execute as normal.",
                             )
                         }
                     });
@@ -265,7 +265,7 @@ const SuperVisorHome = ({ navigation }) => {
                             ]
                         )
                     } else {
-                        console.log(json.data)
+                        console.log('sainath-----', json.data)
                         console.log('json.data.lastActionCode ::: ' + json.data.lastActionCode)
                         setLastActionCode(json.data.lastActionCode)
                         AsyncStorage.setItem('lastAction', json.data.lastActionCode + '');
@@ -373,6 +373,7 @@ const SuperVisorHome = ({ navigation }) => {
                         ]
                     )
                 } else {
+                    console.log('Printing this alert...');
                     Alert.alert(
                         "Alert!",
                         json.responseMessage,
@@ -541,9 +542,16 @@ const SuperVisorHome = ({ navigation }) => {
                                                         "Please note that you applied leave for these day. You are not require to perform Clock In/Out request. Kindly be inform.",
                                                     )
                                                 } else {
-                                                    navigation.navigate('EmployeesClockIn', {
-                                                        branch: location,
+                                                    if (state.isConnected) {
+                                                            navigation.navigate('EmployeesClockIn', {
+                                                            branch: location,
                                                     })
+                                                } else {
+                                                    Alert.alert(
+                                                        "Alert!",
+                                                        "The Clock In functionality is only available while connected to the internet.",
+                                                    )
+                                                }
                                                     // navigation.navigate('EmployeesClockIn')
                                                 }
                                                 // else if (lastActionCode == 2 || lastActionCode == 0) {
@@ -624,9 +632,16 @@ const SuperVisorHome = ({ navigation }) => {
                                                         "Please note that you applied leave for these day. You are not require to perform Clock In/Out request. Kindly be inform.",
                                                     )
                                                 } else {
+                                                    if (state.isConnected) {
                                                     navigation.navigate('EmployeesClockOut', {
                                                         branch: location,
                                                     })
+                                                } else {
+                                                    Alert.alert(
+                                                        "Alert!",
+                                                        "The Clock Out functionality is only available while connected to the internet.",
+                                                    )
+                                                }
                                                     // navigation.navigate('EmployeesClockOut')
                                                 }
                                                 // else if (lastActionCode == 1) {
@@ -647,7 +662,7 @@ const SuperVisorHome = ({ navigation }) => {
                                 </TouchableOpacity>
                             </View>
                             <Text style={{ fontFamily: 'OpenSans-Regular', width: width_1 * .8, fontSize: 12, marginTop: 30, alignItems: 'center', color: 'gray' }}>
-                                The mobile apps able to store clock in & clock out data locally when there is no internet connectivity. You require to submit the data to server when internet connectivity back to normal.
+                            You required to submit the Clock In & Clock Out when internet connection is available and the process should be done before session expires.
                             </Text>
                         </View>
                     </View>

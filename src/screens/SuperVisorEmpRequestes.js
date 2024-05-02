@@ -53,7 +53,7 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
     const [isConnected, setConnected] = useState();
     const [dataArray, setDataArray] = useState([])
     const [userId, setUserId] = useState('');
-    const isFocused = useIsFocused();
+    const isFocused = navigation.isFocused();
     const [selectedValue, setSelectedValue] = useState('Attendance Type');
     const [selectedValueToSend, setSelectedValueTosend] = useState(0);
     const [attendanceType, setAttendanceType] = useState([]);
@@ -176,6 +176,7 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
             .then(response => {
                 console.log('====response.ok=====' + response.ok)
                 if (response.ok) {
+                    console.log('passing response.json() after accep/Reject');
                     return response.json();
                 } else {
                     throw new Error('Something went wrong :: ' + response.status);
@@ -185,7 +186,7 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                 console.log('==== resp  onseCode==== ' + data.responseCode);
                 let json = data;
                 if (json.responseCode == 200) {
-                    console.log(json.data)
+                    console.log('json.data ---', json.data);
                     setLoading(false);
                     setComment('')
                     if (status === 1) {
@@ -311,8 +312,10 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                 console.log('==ERROR== : ' + error)
             })
             .finally(() => {
-                setStartDate(new Date());
-                setEndDate(new Date());
+                // setStartDate(new Date());
+                // setEndDate(new Date());
+                setStartDate('');
+                setEndDate('');
                 setName('');
                 setEmpID('');
                 setSelectedValueTosend(0);
@@ -587,7 +590,9 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                 setStartDate(date)
                                                 setEndDate(date)
                                             }}
-                                        /> */}
+                                        />
+                                        <View style={{flex: 1} }> for below line
+                                        */}
                                         <View style={{}}>
                                             {
                                                 Platform.OS === 'android' ?
@@ -618,6 +623,10 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         const currentDate = date;
                                                         console.log("Start Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
                                                         setShow(false);
+                                                        // {
+                                                        //     Platform.OS === 'android' ? 
+                                                        //     setShow(false) : null
+                                                        // }
                                                         setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
 
                                                         setStartDate_1(currentDate)
@@ -683,6 +692,10 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         const currentDate = date;
                                                         console.log("End Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
                                                         setShow_1(false);
+                                                        // {
+                                                        //     Platform.OS === 'android' ? 
+                                                        //     setShow(false) : null
+                                                        // }
                                                         setDateToShow_1(moment(currentDate).format("DD/MM/YYYY"))
 
                                                         setEndDate_1(currentDate)

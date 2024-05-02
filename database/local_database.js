@@ -7,7 +7,8 @@ export const createUserTabel_1 = ((db) => {
             function (tx, res) {
                 console.log('item:', res.rows.length);
                 if (res.rows.length == 0) {
-                    console.log("already created");
+                    // console.log("already created");
+                    console.log("already created usertable_1");
                     txn.executeSql('DROP TABLE IF EXISTS user', []);
                     txn.executeSql(
                         'CREATE TABLE IF NOT EXISTS user(id INTEGER PRIMARY KEY AUTOINCREMENT, userId VARCHAR(20), token VARCHAR(50), firstName VARCHAR(50), lastName VARCHAR(50), email VARCHAR(50), userRole VARCHAR(50), desigination VARCHAR(50), location VARCHAR(50))',
@@ -66,7 +67,8 @@ export const getUsersFromLocalDB = async (db) => {
                 for (let i = 0; i < results.rows.length; ++i) {
                     temp.push(results.rows.item(i));
                 }
-                console.log('first time' + temp[0].email);
+                // console.log('first time' + temp[0].email);
+                console.log('first time in DB file' + temp[0].email);
                 console.log('=== :: ' + temp[0].email)
             }
         );
@@ -175,7 +177,8 @@ export const createAttendanceTypeTabel = ((db) => {
             function (tx, res) {
                 console.log('item:', res.rows.length);
                 if (res.rows.length == 0) {
-                    console.log("already created");
+                    // console.log("already created");
+                    console.log("already created attendence type table");
                     txn.executeSql('DROP TABLE IF EXISTS attendance_type', []);
                     txn.executeSql(
                         'CREATE TABLE IF NOT EXISTS attendance_type(id INTEGER PRIMARY KEY AUTOINCREMENT, typeId int(11),typeValue VARCHAR(20))',
@@ -190,7 +193,7 @@ export const createAttendanceTypeTabel = ((db) => {
 })
 
 export const insertAttendanceType = ((db, typeId, typeValue) => {
-    console.log(':: :: :: ' + typeValue)
+    console.log('coming here at initial :: :: :: ' + typeValue)
     db.transaction(function (tx) {
         tx.executeSql(
             'INSERT INTO attendance_type (typeId, typeValue) VALUES (?,?)',

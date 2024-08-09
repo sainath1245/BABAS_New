@@ -298,10 +298,10 @@ const AdminDashboard = ({ navigation }) => {
                     console.log('--json.data.attendaceHistories--' + json.data.attendaceHistories)
                     AsyncStorage.setItem('lastAction', '');
                     AsyncStorage.setItem('token', '');
-                    notificationStore.dispatch({
-                        type: "COUNT_CHANGE",
-                        payload: { count: '0' }
-                    });
+          notificationStore.dispatch({
+            type: 'COUNT_CHANGE',
+            payload: {count: 0},
+          });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);
                     deleteTableAllClockRequest(db);

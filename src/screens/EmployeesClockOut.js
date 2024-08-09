@@ -308,13 +308,24 @@ const EmployeesClockOut = ({route, navigation}) => {
                                 style={loginPageStyles.svg_bell_icons}
                                 source={require('../assets/images/notification.png')}
                             />
-                            <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                                <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                    {notificationCount}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
                     <KeyboardAwareScrollView enableOnAndroid={true}
                         keyboardShouldPersistTaps={"handled"}
                         style={{ flexGrow: 1, paddingLeft: 20, paddingRight: 20, marginTop: 10 }}

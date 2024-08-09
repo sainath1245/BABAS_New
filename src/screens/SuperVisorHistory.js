@@ -18,7 +18,7 @@ import {
     View
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DatePicker from 'react-native-datepicker';
+// import DatePicker from 'react-native-datepicker';
 import Modal from "react-native-modal";
 import ModalDropdown from 'react-native-modal-dropdown';
 import { openDatabase } from 'react-native-sqlite-storage';
@@ -30,8 +30,9 @@ import {
     historyPageStyles,
     loginPageStyles
 } from '../utils/styles';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from "native-base";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 var width = Dimensions.get('window').width;
@@ -39,7 +40,7 @@ var width = Dimensions.get('window').width;
 const SuperVisorHistory = ({ navigation }) => {
     const dataAttendanceType = ['All', 'Approved', 'Rejected', 'Not Review'];
     const [selectedValue, setSelectedValue] = useState('Type');
-    const [selectedValueToSend, setSelectedValueTosend] = useState(0);
+    const [selectedValueToSend, setSelectedValueTosend] = useState('All');
     const [item_height, setItemHeight] = useState(0);
     const [dataArray, setDataArray] = useState([])
     const [userId, setUserId] = useState('');
@@ -52,7 +53,9 @@ const SuperVisorHistory = ({ navigation }) => {
     const [date, setDate] = useState(new Date());
     const [dateToSend, setDateToSend] = useState('');
     const [dateToShow, setDateToShow] = useState('Select Date');
-    const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
+    const [show, setShow] = useState(false);
+  const minDate = moment().subtract(90, 'days').toDate();
+  const [originalArray, setOriginalArray] = useState([]);
 
     // This function is to get dynamic height of the UI component 
     const onLayout = (event) => {
@@ -113,47 +116,100 @@ const SuperVisorHistory = ({ navigation }) => {
         });
         return (isConnected);
     }
-
-    // This function is to get Clock in/out Hisotry data from server 
+  const hideCancelPicker = () => {
+    setShow(false);
+  };
+  const handleConfirm = (date) => {
+    const currentDate = date;
+    setShow(false);
+    setDate(currentDate);
+    setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
+    // var formattedDate = format(currentDate, "yyyy-MM-dd");
+    // setDateToSend(formattedDate);
+    const formattedDate = format(currentDate, 'dd/MM/yyyy');
+    setDateToSend(formattedDate);
+    // callHistoryAPI(formattedDate, selectedValueToSend)
+    filterArrayList(formattedDate, selectedValueToSend);
+  };
+  // This function is to get Clock in/out Hisotry data from server
     callHistoryAPI = async (date, selectedValueToSend) => {
-        var number = parseInt(userId);
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID: number, pageNumber: 1, pageSize: 200, status: selectedValueToSend, date: date })
-        };
-        console.log('=======requestOptions====== ' + requestOptions.body)
-        console.log('=======token====== ' + token)
-        await fetch(BASE_URL + 'Attendance/GetAttendanceHistory',
-            requestOptions)
-            .then(response => {
-                console.log('====response.ok=====' + response.ok)
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong :: ' + response.status);
-                }
-            })
-            .then((data) => {
-                console.log('==== resp  onseCode==== ' + data.responseCode);
-                let json = data;
-                if (json.responseCode == 200) {
-                    console.log('==History Data== ' + JSON.stringify(json.data))
-                    setDataArray(json.data.attendaceHistories);
-                } else {
-                    Alert.alert(
-                        "Alert!",
-                        dataArray.responseMessage,
-                    )
-                }
-            })
-            .catch((error) => {
-                console.log('==ERROR== : ' + error)
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+    var number = parseInt(userId);
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userID: number,
+        pageNumber: 1,
+        pageSize: 200,
+        status: 0,
+        date: '',
+      }),
+    };
+    console.log(
+      'callSupervisorHistoryAPI -requestOptions',
+      requestOptions.body,
+    );
+    // console.log('=======token====== ' + token)
+    await fetch(BASE_URL + 'Attendance/GetAttendanceHistory', requestOptions)
+      .then(response => {
+        // console.log('====response.ok=====' + response.ok)
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong :: ' + response.status);
+        }
+      })
+      .then(data => {
+        // console.log('==== resp  onseCode==== ' + data.responseCode);
+        let json = data;
+        if (json.responseCode == 200) {
+        //   console.log('==History Data== ' + JSON.stringify(json.data));
+          setDataArray(json.data.attendaceHistories);
+          setOriginalArray(json.data.attendaceHistories);
+        } else {
+          Alert.alert('Alert!', json.responseMessage);
+        }
+      })
+      .catch(error => {
+        console.log('==ERROR== : ' + error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const filterArrayList = (filteredDate, filteredValue) => {
+    console.log('date in filter--', filteredDate);
+    console.log('selectedVal in filter--', filteredValue);
+    let filterdArrayList = [];
+    if (
+      filteredDate != '' &&
+      filteredValue != 'Type' &&
+      filteredValue != 'All'
+    ) {
+      console.log('Filtering two conditions');
+      filterdArrayList = originalArray.filter(
+        each => each.startDate == filteredDate && each.requestStatus == filteredValue,
+      );
+    } else if (filteredDate != 'Select Date' && filteredDate != '') {
+      console.log('filtering date');
+      filterdArrayList = originalArray.filter(
+        each => each.startDate == filteredDate,
+      );
+    } else if (filteredValue != 'Type' && filteredValue != 'All') {
+      console.log('Filtering selectedValue');
+      filterdArrayList = originalArray.filter(
+        each => each.requestStatus == filteredValue,
+      );
+    } else if (filteredValue == 'All' && filteredDate == '') {
+      console.log('Filtering selectedValue with date null');
+      filterdArrayList = originalArray;
     }
+    setDataArray(filterdArrayList);
+  };
 
     // This function is to set FlatList UI
     const renderItem = ({ item }) => (
@@ -380,28 +436,32 @@ const SuperVisorHistory = ({ navigation }) => {
                                 saveScrollPosition={false}
                                 onSelect={
                                     (e) => {
-                                        console.log(e)
-                                        setSelectedValue(e)
+                                        // console.log(e)
+                                        // setSelectedValue(e)
                                         if (e === 0) {
                                             setSelectedValue('All');
-                                            setSelectedValueTosend(0)
-                                            callHistoryAPI(dateToSend, 0);
+                                            setSelectedValueTosend('All');
+                                            // callHistoryAPI(dateToSend, 0);
+                                            filterArrayList(dateToSend, 'All');
                                         } else if (e === 1) {
                                             setSelectedValue('Approved');
-                                            setSelectedValueTosend(1)
-                                            callHistoryAPI(dateToSend, 1);
+                                            setSelectedValueTosend('Approved');
+                                            // callHistoryAPI(dateToSend, 1);
+                                            filterArrayList(dateToSend, 'Approved');
                                         } else if (e === 2) {
                                             setSelectedValue('Rejected');
-                                            setSelectedValueTosend(2)
-                                            callHistoryAPI(dateToSend, 2);
+                                            setSelectedValueTosend('Rejected');
+                                            // callHistoryAPI(dateToSend, 2);
+                                            filterArrayList(dateToSend, 'Rejected');
                                         } else if (e === 3) {
                                             setSelectedValue('Not Review');
-                                            setSelectedValueTosend(3)
-                                            callHistoryAPI(dateToSend, 3);
+                                            setSelectedValueTosend('Pending');
+                                            // callHistoryAPI(dateToSend, 3);
+                                            filterArrayList(dateToSend, 'Pending');
                                         }
                                     }}
                             />
-                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 200 }}>
+                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 165 }}>
                                 <Text style={{ fontFamily: 'OpenSans-Regular', marginLeft: 10 }}>
                                     {selectedValue}
                                 </Text>
@@ -416,48 +476,21 @@ const SuperVisorHistory = ({ navigation }) => {
                             style={loginPageStyles.svg_icons}
                             source={require('../assets/images/calendar.png')}
                         />
-                        {/* <DatePicker
-                            customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                            date={date}
-                            mode="date"
-                            placeholder="Select date"
-                            format="DD/MM/YYYY"
-                            maxDate={maxDate}
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            showIcon={false}
-                            onDateChange={(dateStr, date) => {
-                                var date_temp = moment(date).format("DD/MM/YYYY")
-                                setDate(date_temp);
-                                var formattedDate_1 = format(date, "yyyy-MM-dd");
-                                setDateToSend(formattedDate_1);
-                                callHistoryAPI(formattedDate_1, selectedValueToSend)
-                            }}
-                        /> */}
-                        <View style={{}}>
-                            {
-                                Platform.OS === 'android' ?
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                            {dateToShow}
-                                        </Text>
-                                    </Button>
-                                    :
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                        </Text>
-                                    </Button>
-                            }
-                            {show && (
+            <View style={{flex: 1}}>
+              <Button
+                backgroundColor={'white'}
+                onPress={() => {
+                  setShow(true);
+                }}>
+                <Text style={{color: 'black'}}>{dateToShow}</Text>
+              </Button>
+                            {/* {show && (
                                 <DateTimePicker
                                     style={{ position: 'absolute' }}
                                     testID="dateTimePicker"
                                     value={date}
                                     mode='date'
+                                    minimumDate={minDate}
                                     maximumDate={maxDate}
                                     onChange={(event, date) => {
                                         const currentDate = date;
@@ -465,21 +498,33 @@ const SuperVisorHistory = ({ navigation }) => {
                                         setShow(false);
                                         setDate(currentDate);
                                         setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        if (Platform.OS === 'ios') {
-                                            const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                            setDateToSend(formattedDate);
-                                            callHistoryAPI(formattedDate, selectedValueToSend)
-                                        } else {
-                                            var formattedDate_1 = format(currentDate, "yyyy-MM-dd");
-                                            setDateToSend(formattedDate_1);
-                                            callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        }
+                                        // if (Platform.OS === 'ios') {
+                                        //     const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
+                                        //     setDateToSend(formattedDate);
+                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
+                                        // } else {
+                                        //     var formattedDate_1 = format(currentDate, "yyyy-MM-dd");
+                                        //     setDateToSend(formattedDate_1);
+                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
+                                        // }
+                                        var formattedDate = format(currentDate, "yyyy-MM-dd");
+                                        setDateToSend(formattedDate);
+                                        callHistoryAPI(formattedDate, selectedValueToSend)
                                     }}
                                 />
-                            )}
-                        </View>
-                    </View>
-                </View>
+                            )} */}
+              <DateTimePickerModal
+                isVisible={show}
+                mode="date"
+                date={date}
+                minimumDate={minDate}
+                maximumDate={maxDate}
+                onConfirm={handleConfirm}
+                onCancel={hideCancelPicker}
+              />
+            </View>
+          </View>
+        </View>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>
                     {
                         dataArray.length > 0 ? <FlatList

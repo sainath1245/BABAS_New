@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePicker from '@react-native-community/datetimepicker';
+// import DateTimePicker from '@react-native-community/datetimepicker';
 import NetInfo from "@react-native-community/netinfo";
 import { format } from "date-fns";
 import moment from 'moment';
@@ -30,6 +30,7 @@ import {
     loginPageStyles
 } from '../utils/styles';
 import { Button } from 'native-base';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 var width = Dimensions.get('window').width;
 var db = openDatabase({ name: 'BABAS_DB.db' });
@@ -41,20 +42,18 @@ const AdminActivityLog = ({ navigation }) => {
     const [dateToSend, setDateToSend] = useState('');
     const [dropDown, setDropDown] = useState(false);
     const [selectedValue, setSelectedValue] = useState('Activity');
-    const [selectedValueToSend, setSelectedValueTosend] = useState(0);
+    const [selectedValueToSend, setSelectedValueTosend] = useState('All');
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [isConnected, setConnected] = useState();
     const [dataArray, setDataArray] = useState([]);
     const [userId, setUserId] = useState('');
     const [maxDate, setMaxDate] = useState(new Date());
-    const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
+    const [show, setShow] = useState(false);
+    const minDate = moment().subtract(90, 'days').toDate();
+    const [originalArray, setOriginalArray] = useState([]);
 
     useEffect(() => {
-        // var today = new Date();
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setMaxDate(formattedDate);
-
         // This method to get the userId from local DB
         db.transaction((tx) => {
             tx.executeSql(
@@ -101,12 +100,12 @@ const AdminActivityLog = ({ navigation }) => {
 
     // This function is to get all atendace type from server
     getActivityLog = async (date, selectedValueToSend) => {
-        console.log('dateToSend ==================== : ' + selectedValueToSend)
+        // console.log('dateToSend ==================== : ' + selectedValueToSend, date)
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adminID: number, activityDate: date, activityType: selectedValueToSend })
+            body: JSON.stringify({ adminID: number, activityDate: date, activityType: 0 })
         };
         console.log('=======requestOptions====== ' + requestOptions.body)
         console.log('=======token====== ' + token)
@@ -126,10 +125,11 @@ const AdminActivityLog = ({ navigation }) => {
                 if (json.responseCode == 200) {
                     console.log(json.data)
                     setDataArray(json.data);
+                    setOriginalArray(json.data);
                 } else {
                     Alert.alert(
                         "Alert!",
-                        dataArray.responseMessage,
+                        json.responseMessage,
                     )
                 }
             })
@@ -141,20 +141,48 @@ const AdminActivityLog = ({ navigation }) => {
             });
     }
 
-    const changeDateFormate = (startDate) => {
-        var date_1 = new Date(startDate);
-        var formattedDate_1 = format(date_1, "dd/MM/yyyy");
-        return formattedDate_1;
-    }
+  const hideCancelPicker = () => {
+    setShow(false);
+  };
+  const handleConfirmPicker = date => {
+    const currentDate = date;
+    setShow(false);
+    setDate(currentDate);
+    setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
 
-    // This functio is to change the date formate and it will store in state to show in UI
-    const setDateToUI = (date) => {
-        // var date_temp = moment(date).format("DD/MM/YYYY")
-        setDate(date);
-        var formattedDate_1 = format(date, "yyyy-MM-dd");
-        setDateToSend(formattedDate_1);
-        getActivityLog(formattedDate_1, selectedValueToSend)
+    const formattedDate = moment(currentDate).format('DD/MM/YYYY');
+    setDateToSend(formattedDate);
+    filterActivityLogArray(formattedDate, selectedValueToSend);
+  };
+  const filterActivityLogArray = (filteredDate, filteredValue) => {
+    console.log('date in filter--', filteredDate);
+    console.log('selectedVal in filter--', filteredValue);
+    let filterdArrayList = [];
+    if (
+      filteredDate != '' &&
+      filteredValue != 'Activity' &&
+      filteredValue != 'All'
+    ) {
+      console.log('Filtering two conditions');
+      filterdArrayList = originalArray.filter(
+        each => each.date == filteredDate && each.logType == filteredValue,
+      );
+    } else if (filteredDate != 'Select Date' && filteredDate != '') {
+      console.log('filtering date');
+      filterdArrayList = originalArray.filter(
+        each => each.date == filteredDate,
+      );
+    } else if (filteredValue != 'Activity' && filteredValue != 'All') {
+      console.log('Filtering selectedValue');
+      filterdArrayList = originalArray.filter(
+        each => each.logType == filteredValue,
+      );
+    } else if (filteredValue == 'All' && filteredDate == '') {
+      console.log('Filtering selectedValue with date null');
+      filterdArrayList = originalArray;
     }
+    setDataArray(filterdArrayList);
+  };
 
     // This function is to set FlatList UI
     const renderItem = ({ item }) => (
@@ -234,28 +262,32 @@ const AdminActivityLog = ({ navigation }) => {
                                 saveScrollPosition={false}
                                 onSelect={
                                     (e) => {
-                                        console.log(e)
-                                        setSelectedValue(e)
+                                        // console.log(e)
+                                        // setSelectedValue(e)
                                         if (e === 0) {
                                             setSelectedValue('All');
-                                            setSelectedValueTosend(0)
-                                            getActivityLog(dateToSend, 0);
+                                            setSelectedValueTosend('All');
+                                            // getActivityLog(dateToSend, 0);
+                                            filterActivityLogArray(dateToSend, 'All');
                                         } else if (e === 1) {
                                             setSelectedValue('Reset Password');
-                                            setSelectedValueTosend(2)
-                                            getActivityLog(dateToSend, 2);
+                                            setSelectedValueTosend('Reset Password');
+                                            // getActivityLog(dateToSend, 2);
+                                            filterActivityLogArray(dateToSend, 'Reset Password');
                                         } else if (e === 2) {
                                             setSelectedValue('Delegation');
-                                            setSelectedValueTosend(3)
-                                            getActivityLog(dateToSend, 3);
+                                            setSelectedValueTosend('Supervisor Mapping');
+                                            // getActivityLog(dateToSend, 3);
+                                            filterActivityLogArray(dateToSend, 'Supervisor Mapping');
                                         } else if (e === 3) {
                                             setSelectedValue('Attendance Type');
-                                            setSelectedValueTosend(1)
-                                            getActivityLog(dateToSend, 1);
+                                            setSelectedValueTosend('Attendance Type');
+                                            // getActivityLog(dateToSend, 1);
+                                            filterActivityLogArray(dateToSend, 'Attendance Type');
                                         }
                                     }}
                             />
-                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 200 }}>
+                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 165 }}>
                                 <Text style={{ fontFamily: 'OpenSans-Regular', marginLeft: 10 }}>
                                     {selectedValue}
                                 </Text>
@@ -270,22 +302,8 @@ const AdminActivityLog = ({ navigation }) => {
                             style={loginPageStyles.svg_icons}
                             source={require('../assets/images/calendar.png')}
                         />
-                        {/* <DatePicker
-                            customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                            date={date}
-                            mode="date"
-                            format='DD/MM/YYYY'
-                            maxDate={maxDate}
-                            placeholder="Select date"
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            showIcon={false}
-                            onDateChange={(dateStr, date) => {
-                                setDateToUI(date);
-                            }}
-                        /> */}
-                        <View style={{}}>
-                            {
+                        <View style={{flex: 1}}>
+                            {/* {
                                 Platform.OS === 'android' ?
                                     <Button backgroundColor={'white'} style={{}} onPress={() => {
                                         setShow(true);
@@ -301,8 +319,15 @@ const AdminActivityLog = ({ navigation }) => {
                                         <Text style={{ color: 'black' }}>
                                         </Text>
                                     </Button>
-                            }
-                            {show && (
+                            } */}
+              <Button
+                backgroundColor={'white'}
+                onPress={() => {
+                  setShow(true);
+                }}>
+                <Text style={{color: 'black'}}>{dateToShow}</Text>
+              </Button>
+              {/* {show && (
                                 <DateTimePicker
                                     style={{ position: 'absolute' }}
                                     testID="dateTimePicker"
@@ -326,8 +351,17 @@ const AdminActivityLog = ({ navigation }) => {
                                         }
                                     }}
                                 />
-                            )}
-                        </View>
+                            )} */}
+              <DateTimePickerModal
+                isVisible={show}
+                mode="date"
+                date={date}
+                minimumDate={minDate}
+                maximumDate={maxDate}
+                onConfirm={handleConfirmPicker}
+                onCancel={hideCancelPicker}
+              />
+            </View>
                     </View>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>

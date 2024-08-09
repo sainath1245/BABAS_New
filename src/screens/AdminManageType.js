@@ -26,6 +26,7 @@ const AdminManageType = ({ navigation }) => {
 
     const [newArray, setNewArray] = useState(dataArray);
     const [userId, setUserId] = useState('');
+    const [showBtns, setShowBtns] = useState(false);
 
     useEffect(() => {
         // This functio to get userId and userdata from local DB
@@ -90,6 +91,7 @@ const AdminManageType = ({ navigation }) => {
                 if (json.responseCode == 200) {
                     console.log('resposne ========= ===== ==== ' + JSON.stringify(json.data))
                     setDataArray(json.data);
+                    setShowBtns(true);
                 } else {
                     Alert.alert(
                         "Alert!",
@@ -189,164 +191,188 @@ const AdminManageType = ({ navigation }) => {
     }
 
     // This function is to set FlatList UI
-    const renderItem = ({ item, index }) => (
-        <View>
-            <View style={historyPageStyles.list_main_container}>
-                <View style={adminSuperVisorMapping.list_second_container}>
-                    <View stye onLayout={onLayout} style={{ padding: 10, flexDirection: 'row' }}>
-                        <Text style={adminSuperVisorMapping.type_text_1}>
-                            {index+1}.  {item.workName}
-                        </Text>
-                        <TouchableOpacity
-                            onPress={() => {
-                                Alert.alert(
-                                    "Alert!",
-                                    'Are you sure you want to delete \n' + item.workName + '?',
-                                    [
-                                        {
-                                            text: "Cancel",
-                                            onPress: () => console.log("Cancel Pressed"),
-                                        },
-                                        {
-                                            text: "Delete",
-                                            onPress: () => {
-                                                deleteWorkType(item.workId)
-                                            }
-                                        }
-                                    ]
-                                )
-                            }}>
-                            <Image
-                                style={loginPageStyles.svg_icon_delete}
-                                source={require('../assets/images/bin.png')} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        </View>
-    );
-
-    // This function is to set the UI
-    return (
-        <View style={loginPageStyles.container_1}>
-            <StatusBar barStyle="default"
-                backgroundColor="#FA0F0A" />
-            <View style={{ flexDirection: 'column', flex: 1 }}>
-                <Image
-                    style={EmployeesUploadDocumentsPageStyles.top_image}
-                    source={require('../assets/images/top_image_1.png')}
-                />
-                <View style={adminSuperVisorMapping.top_image_layer}>
-                    <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 24, fontWeight: '400' }}>
-                        {/* Clock-In Type */}
-                    </Text>
-                </View>
-                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>
+  const renderItem = ({ item, index }) => (
+    <View>
+      <View style={historyPageStyles.list_main_container}>
+        <View style={adminSuperVisorMapping.list_second_container}>
+          <View
+            stye
+            onLayout={onLayout}
+            style={{ padding: 10, flexDirection: 'row' }}>
+            <Text style={adminSuperVisorMapping.type_text_1}>
+              {index + 1}.  {item.workName}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                Alert.alert(
+                  'Alert!',
+                  'Are you sure you want to delete \n' + item.workName + '?',
+                  [
                     {
-                        dataArray.length > 0 ? <FlatList
-                            style={{ marginTop: 10, marginBottom: 30, width: '100%' }}
-                            showsVerticalScrollIndicator={false}
-                            data={dataArray}
-                            keyExtractor={(item, index) => index.toString()}
-                            renderItem={renderItem}
-                        />
-                            :
-                            <Text style={{ fontFamily: 'OpenSans-Regular', alignSelf: 'center', fontSize: 12, color: '#000' }}>
-                                Attendance type will appear here.
-                            </Text>
-                    }
-                </View>
-                <View style={{ flexDirection: 'row', alignSelf: 'center' }}>
-                    <TouchableOpacity
-                        onPress={() => {
-                            Alert.alert(
-                                "Alert!",
-                                'Are you sure you want to Delete All?',
-                                [
-                                    {
-                                        text: "Cancel",
-                                        onPress: () => console.log("Cancel Pressed"),
-                                    },
-                                    {
-                                        text: "Delete All",
-                                        onPress: () => {
-                                            deleteWorkType(0)
-                                        }
-                                    }
-                                ]
-                            )
-                        }}
-                        style={employeesForgotPasswordPageStyles.add_more_btn}>
-                        <Text style={loginPageStyles.btn_text}>
-                            Delete All
-                        </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={() => {
-                            setType('');
-                            setAddPopupVisible(true);
-                        }}
-                        style={employeesForgotPasswordPageStyles.add_more_btn}>
-                        <Text style={loginPageStyles.btn_text}>
-                            Add More
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-            <Modal isVisible={isAddPopupVisible}
-                animationIn="slideInUp"
-                animationOut="slideOutDown"
-                useNativeDriver={true}>
-                <View style={alertStyles.alertBg}>
-                    <Text style={{ fontFamily: 'OpenSans-Regular', width: '90%', marginTop: 10, fontSize: 14, color: 'black' }}>
-                        Add new Attendance type
-                    </Text>
-                    <View style={loginPageStyles.edit_type_bg}>
-                        <TextInput
-                            style={loginPageStyles.input}
-                            keyboardType="default"
-                            placeholder="Type"
-                            placeholderTextColor="#e0e0e0"
-                            onChangeText={(value) => setType(value)}
-                        />
-                    </View>
-                    <View style={alertStyles.alertButtonsLayout}>
-                        <TouchableOpacity
-                            onPress={() =>
-                                setAddPopupVisible(false)
-                            }
-                            style={superVisorEmployeeRequestStyles.button_cancel}>
-                            <Text style={superVisorEmployeeRequestStyles.text_reject}>
-                                Cancel
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => {
-                                console.log('ype.length ::' + type.length);
-                                if (type.length !== 0) {
-                                    setAddPopupVisible(false);
-                                    addWorkType(type);
-                                    setType('');
-                                } else {
-                                    Alert.alert(
-                                        "Alert!",
-                                        "Attendance type should not be empty.",
-                                    )
-                                }
-                            }}
-                            style={superVisorEmployeeRequestStyles.button_submit}>
-                            <Text style={superVisorEmployeeRequestStyles.text_reject}>
-                                Submit
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
-            <Modal isVisible={loading} style={{ position: 'relative', flex: 1, justifyContent: 'center', alignItems: 'center', }}>
-                <ActivityIndicator color={'#fff'} />
-            </Modal>
-        </View >
-    );
+                      text: 'Cancel',
+                      onPress: () => console.log('Cancel Pressed'),
+                    },
+                    {
+                      text: 'Delete',
+                      onPress: () => {
+                        deleteWorkType(item.workId);
+                      },
+                    },
+                  ],
+                );
+              }}>
+              <Image
+                style={loginPageStyles.svg_icon_delete}
+                source={require('../assets/images/bin.png')}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+
+  // This function is to set the UI
+  return (
+    <View style={loginPageStyles.container_1}>
+      <StatusBar barStyle="default" backgroundColor="#FA0F0A" />
+      <View style={{ flexDirection: 'column', flex: 1 }}>
+        <Image
+          style={EmployeesUploadDocumentsPageStyles.top_image}
+          source={require('../assets/images/top_image_1.png')}
+        />
+        <View style={adminSuperVisorMapping.top_image_layer}>
+          <Text
+            style={{
+              fontFamily: 'OpenSans-Regular',
+              color: 'white',
+              fontSize: 24,
+              fontWeight: '400'
+            }}>
+            {/* Clock-In Type */}
+          </Text>
+        </View>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          {dataArray.length > 0 ? (
+            <FlatList
+              style={{marginTop: 10, marginBottom: 30, width: '100%'}}
+              showsVerticalScrollIndicator={false}
+              data={dataArray}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={renderItem}
+            />
+          ) : (
+            <Text
+              style={{
+                fontFamily: 'OpenSans-Regular',
+                alignSelf: 'center',
+                fontSize: 12,
+                color: '#000',
+              }}>
+              Attendance type will appear here.
+            </Text>
+          )}
+        </View>
+        {showBtns && (
+          <View style={{flexDirection: 'row', alignSelf: 'center'}}>
+            <TouchableOpacity
+              onPress={() => {
+                Alert.alert('Alert!', 'Are you sure you want to Delete All?', [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                  },
+                  {
+                    text: 'Delete All',
+                    onPress: () => {
+                      deleteWorkType(0);
+                    },
+                  },
+                ]);
+              }}
+              style={employeesForgotPasswordPageStyles.add_more_btn}>
+              <Text style={loginPageStyles.btn_text}>Delete All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setType('');
+                setAddPopupVisible(true);
+              }}
+              style={employeesForgotPasswordPageStyles.add_more_btn}>
+              <Text style={loginPageStyles.btn_text}>Add More</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+      <Modal
+        isVisible={isAddPopupVisible}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        useNativeDriver={true}>
+        <View style={alertStyles.alertBg}>
+          <Text
+            style={{
+              fontFamily: 'OpenSans-Regular',
+              width: '90%',
+              marginTop: 10,
+              fontSize: 14,
+              color: 'black',
+            }}>
+            Add new Attendance type
+          </Text>
+          <View style={loginPageStyles.edit_type_bg}>
+            <TextInput
+              style={loginPageStyles.input}
+              keyboardType="default"
+              placeholder="Type"
+              placeholderTextColor="#e0e0e0"
+              onChangeText={value => setType(value)}
+            />
+          </View>
+          <View style={alertStyles.alertButtonsLayout}>
+            <TouchableOpacity
+              onPress={() => setAddPopupVisible(false)}
+              style={superVisorEmployeeRequestStyles.button_cancel}>
+              <Text style={superVisorEmployeeRequestStyles.text_reject}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                console.log('type.length ::' + type.length);
+                if (type.length !== 0) {
+                  setAddPopupVisible(false);
+                  addWorkType(type);
+                  setType('');
+                } else {
+                  Alert.alert('Alert!', 'Attendance type should not be empty.');
+                }
+              }}
+              style={superVisorEmployeeRequestStyles.button_submit}>
+              <Text style={superVisorEmployeeRequestStyles.text_reject}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        isVisible={loading}
+        style={{
+          position: 'relative',
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <ActivityIndicator color={'#fff'} />
+      </Modal>
+    </View>
+  );
 };
 
 export default AdminManageType;

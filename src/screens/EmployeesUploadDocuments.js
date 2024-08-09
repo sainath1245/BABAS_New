@@ -33,6 +33,7 @@ import { BASE_URL } from '../utils/consts';
 import { insertClock } from '../../database/local_database';
 import notificationStore from '../../notification_redux/notificationStore';
 import ViewShot from "react-native-view-shot";
+import DeviceInfo from 'react-native-device-info';
 // import {useTimer} from '../utils/SessionContext';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
@@ -109,25 +110,6 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
             );
         });
         checkInternet();
-        // const handleAppStateChange = (nextAppState) => {
-        //     if (appState.match(/inactive|background/) && nextAppState === 'active') {
-        //     // App has returned from the background
-        //     console.log('App returned to foreground');
-        //     } else if (appState === 'active' && nextAppState.match(/inactive|background/)) {
-        //     // App has entered the background
-        //     console.log('App entered background');
-        //     // stopTimer();
-        //         }
-        //         setAppState(nextAppState);
-        //       };
-          
-        //       // Subscribe to app state changes
-        //       const subscription = AppState.addEventListener('change', handleAppStateChange);
-          
-        //       return () => {
-        //         // Unsubscribe from app state changes when component unmounts
-        //         subscription.remove();
-        //       };
     }, []);
 
     // This function is to capture the screenshot for the Image popup 
@@ -194,6 +176,12 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
             type: 'image/jpeg', //the mime type of the file
             name: date + time + 'image.jpg'
         }
+    var deviceVersion = '';
+    if (Platform.OS == 'ios') {
+      deviceVersion = DeviceInfo.getVersion() + '(I)';
+    } else {
+      deviceVersion = DeviceInfo.getVersion() + '(A)';
+    }
         const data = new FormData()
         data.append("userID", number)
         data.append("longitude", lng)
@@ -207,12 +195,13 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
         data.append("location", shopLocation)
         data.append("remark", remark)
         data.append('image', imageData)
+        data.append('versionDetail', deviceVersion)
         const requestOptions = {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token },
             body: data
         };
-        console.log('======REQUEST BODY======= ' + JSON.stringify(requestOptions.body));
+        console.log('======REQUEST BODY======= ' + JSON.stringify(requestOptions.body));        
         await fetch(BASE_URL + 'Attendance/SaveAttendanceRequest/',
             requestOptions)
             .then(response => {
@@ -260,16 +249,6 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                 request(Platform.OS === 'ios' ? null : PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE).then((result) => {
                     // setPermissionResult(result)
                     if (result === 'granted') {
-                        // let options = {
-                        //     storageOptions: {
-                        //         skipBackup: true,
-                        //         path: 'images',
-                        //     },
-                        //     quality: 0.7,
-                        //     cameraType: 'front',
-                        //     maxWidth: 1200,
-                        //     maxHeight: 1200
-                        // };
                         setTimeout(() => {
                             try {
                                 ImagePicker.openCamera({
@@ -500,11 +479,6 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
       //diff in timers before --', '2024-03-21 19:21:27.548', '2024-03-21 19:21:33.428'
     function getTimeDifferenceInSeconds(time1, time2) {
         if (Platform.OS === 'android') {
-        // Parse the time strings into Date objects
-        // console.log('diff in timers before getTime--', time1, time2);
-        // const date1 = new Date(time1).getTime();
-        // const date2 = new Date(time2).getTime();
-
         let dateParam1 = time1.split(/[\s-:]/);
         // console.log('diff dateparam2--', dateParam1);
         dateParam1[1] = (parseInt(dateParam1[1], 10) - 1).toString();
@@ -522,34 +496,11 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
         // console.log('diff in mill sec is --', diffInMillSec);
         const diffInSec = parseInt(diffInMillSec / 1000);
         console.log('Diff in Sec Andriod---', diffInSec);
-        // const date1 = new Date(time1.replace(/-/g, '/'));
-        // const date2 = new Date(time2.replace(/-/g, '/'));
-        // const date1 = new Date(time1).getTime();
-        // const date2 = new Date(time2).getTime();
-        // const date1 = new Date(`${time1}`).getTime();
-        // const date2 = new Date(`${time2}`).getTime();
-        // const date1 = new Date("2024-03-21 19:21:27.548");
-        // const date2 = new Date("2024-03-21 19:21:33.428");
-        // console.log('diff in two timmers - ', time1, time2);
-        // console.log('diff in before date1 and date2 are --', date1, date2);
-        //getting as Invalid Date for date1 and date2
-
-        // Calculate the difference in milliseconds
-        // const differenceMilliseconds = Math.abs(date1 - date2);
-    //   console.log('diff in mill secs', differenceMilliseconds);
-        // Convert difference to seconds
-        // const differenceSeconds = parseInt(differenceMilliseconds / 1000);
-        // console.log('diff in secs---', differenceSeconds);
         return diffInSec;
         } else {
         const date1 = new Date(time1);
         const date2 = new Date(time2);
-        // console.log('diff in two timmers - ', time1, time2);
-        // console.log('date1 and date2 are --', date1, date2);
-        // Calculate the difference in milliseconds
         const differenceMilliseconds = Math.abs(date1 - date2);
-        // console.log('diff in mill secs', differenceMilliseconds);
-        // Convert difference to seconds
         const differenceSeconds = parseInt(differenceMilliseconds / 1000);
         console.log('diff in secs iOS---', differenceSeconds);
         return differenceSeconds;
@@ -589,13 +540,24 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                                 style={loginPageStyles.svg_bell_icons}
                                 source={require('../assets/images/notification.png')}
                             />
-                            <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                                <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                    {notificationCount}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
                     <KeyboardAwareScrollView enableOnAndroid={true}
                         keyboardShouldPersistTaps='handled'
                         enableResetScrollToCoords={false}>

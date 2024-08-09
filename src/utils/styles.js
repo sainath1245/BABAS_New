@@ -2,6 +2,7 @@ import {
     Dimensions,
     StyleSheet
 } from 'react-native';
+import { backgroundColor, marginBottom, marginRight, marginTop, paddingLeft, paddingRight } from 'styled-system';
 
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
@@ -587,6 +588,17 @@ const EmployeesUploadDocumentsPageStyles = ({
         marginLeft: -25,
         position: 'relative'
     },
+    white_circle_badge: {
+        height: 15,
+        width: 15,
+        borderRadius: 15,
+        backgroundColor: 'transparent',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: -5,
+        marginLeft: -25,
+        position: 'relative'
+    },
     circle_upload_image: {
         height: 40,
         width: 40,
@@ -651,7 +663,7 @@ const EmployeesUploadDocumentsPageStyles = ({
         marginTop: 20,
     },
     drop_1: {
-        width: width * .5,
+        width: width * .4,
         height: 140,
         padding: 6,
         marginTop: 10,
@@ -1023,6 +1035,28 @@ const historyPageStyles = ({
         fontSize: 14,
         color: '#fb0f0c',
         fontFamily: 'OpenSans-SemiBold',
+    },
+    noti_delete:
+    {
+        resizeMode: "contain",
+        height: 20,
+        width: 20,
+        marginRight: 5,
+        marginTop: 35,
+        tintColor: 'gray',
+    },
+    delete_all_btn: {
+        height: 45,
+        width: width * .4,
+        backgroundColor: '#fb0f0c',
+        marginBottom: 20,
+        marginLeft: 4,
+        marginRight: 4,
+        marginTop: -10,
+        alignSelf: 'center',
+        borderRadius: 50,
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     employee_name_text:
     {
@@ -1426,7 +1460,7 @@ const adminSuperVisorMapping = StyleSheet.create({
     },
     list_second_container_red: {
         width: width * .9,
-        backgroundColor: '#F9E9E8',
+        backgroundColor: '#ffffff',
         flexDirection: 'row',
         alignItems: 'center',
     },

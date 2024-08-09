@@ -17,8 +17,7 @@ import Modal from 'react-native-modal';
 import NetInfo from '@react-native-community/netinfo';
 import DeviceInfo from 'react-native-device-info';
 import {BASE_URL} from '../utils/consts';
-import {SemVer} from 'semver';
-// import {backgroundColor} from 'styled-system';
+import notifee from '@notifee/react-native';
 
 var db = openDatabase({name: 'BABAS_DB.db'});
 
@@ -30,13 +29,12 @@ const Splash = ({navigation}) => {
   const [noNetCancelSelected, setNoNetCancelSelected] = useState(false);
   const [navigateToStore, setNavigateToStore] = useState(false);
   const [serverLeastVersion, setServerLeastVersion] = useState('');
-  // const [textOnUI, setTextOnUI] = useState('');
-  // const [intervalId, setIntervalId] = useState(null);
-  // const [timer, setTimer] = useState(0);
+
   const semver = require('semver');
 
   useEffect(() => {
-    console.log('Splash screen called here....');
+    // console.log('Splash screen called here....');
+    notifee.cancelAllNotifications();
     console.log(
       'AsyncStorage.getItem :: ' +
         AsyncStorage.getItem('screen', (_err, item) =>
@@ -60,17 +58,17 @@ const Splash = ({navigation}) => {
   }, []);
 
   useEffect(() => {
-    console.log(
-      `local DB response-- ${isDataAvailable}, serverResponse val -${serverLeastVersion}`,
-    );
+    // console.log(
+    //   `local DB response-- ${isDataAvailable}, serverResponse val -${serverLeastVersion}`,
+    // );
     // navigateUserToParticularScreen();
     if (isDataAvailable && serverLeastVersion !== '') {
       // navigateUserToParticularScreen();
       // compareAppVersionWithStoreVersion(JSON.stringify(apiResponse));
-      console.log(
-        'serverLeastVersion verion from API response ---',
-        serverLeastVersion,
-      );
+      // console.log(
+      //   'serverLeastVersion verion from API response ---',
+      //   serverLeastVersion,
+      // );
       compareAppVersionWithStoreVersion();
       // navigateToPlayStore();
     }
@@ -97,9 +95,9 @@ const Splash = ({navigation}) => {
             // checkInternetConnection();
             setTimeout(() => {
               checkInternetConnection();
-              console.log(
-                `isDataAvailable updated to true, vaaal-- ${isDataAvailable}`,
-              );
+              // console.log(
+              //   `isDataAvailable updated to true, vaaal-- ${isDataAvailable}`,
+              // );
             }, 1000);
           },
           // (_tx, error) => {
@@ -108,23 +106,23 @@ const Splash = ({navigation}) => {
         );
       },
       error => {
-        console.log('error in transaction', error);
+        // console.log('error in transaction', error);
         setIsDataAvailable(true);
         setTimeout(() => {
           checkInternetConnection();
-          console.log(
-            `isDataAvailable updated to true, vaaal-- ${isDataAvailable}`,
-          );
+          // console.log(
+          //   `isDataAvailable updated to true, vaaal-- ${isDataAvailable}`,
+          // );
         }, 1000);
       },
     );
   };
   const checkInternetConnection = async () => {
-    console.log('checking internet');
+    // console.log('checking internet');
     // setTextOnUI('Checking internet connection.');
     NetInfo.fetch().then(state => {
       if (state.isConnected) {
-        console.log('isDataAvailable ---', isDataAvailable);
+        // console.log('isDataAvailable ---', isDataAvailable);
         // setTextOnUI('Internet connection available. Fetching data.');
         setLoading(true);
         setNoNetCancelSelected(false);
@@ -138,7 +136,7 @@ const Splash = ({navigation}) => {
               {
                 text: 'Ok',
                 onPress: () => {
-                  console.log('Ok pressed for no internet.');
+                  // console.log('Ok pressed for no internet.');
                   setNoNetCancelSelected(true);
                 },
                 //   style: 'cancel',
@@ -175,11 +173,11 @@ const Splash = ({navigation}) => {
     //   }),
     // };
     // console.log('===requestOptions.body ===========' + requestOptions.body);
-    console.log('FetchMethod called');
+    // console.log('FetchMethod called');
     await fetch(BASE_URL + 'Version/GetVersion', requestOptions)
       //  await fetch(BASE_URL + 'Login/NonBabaUserLogin', requestOptions)
       .then(response => {
-        console.log('====API Response Code  ==== ' + response.ok);
+        // console.log('====API Response Code  ==== ' + response.ok);
         if (response.ok) {
           return response.json();
         } else {
@@ -187,22 +185,22 @@ const Splash = ({navigation}) => {
         }
       })
       .then(data => {
-        console.log('==== API data response ==== ', data);
-        console.log(
-          'API data.data response ==== ',
-          data.data.ios.least_supported_app,
-        );
-        console.log('==stringify data ----' + JSON.stringify(data));
+        // console.log('==== API data response ==== ', data);
+        // console.log(
+        //   'API data.data response ==== ',
+        //   data.data.ios.least_supported_app,
+        // );
+        console.log('data res of get version----' + JSON.stringify(data));
         if (data.responseCode === 200) {
           if (Platform.OS === 'ios') {
             // console.log('ioS log...', resultOfAPI.ios);
-            console.log('ioS log...', data.data.ios.least_supported_app);
+            // console.log('ioS log...', data.data.ios.least_supported_app);
             setServerLeastVersion(data.data.ios.least_supported_app);
           } else {
-            console.log(
-              'ANdroid log....',
-              data.data.android.least_supported_app,
-            );
+            // console.log(
+            //   'ANdroid log....',
+            //   data.data.android.least_supported_app,
+            // );
             setServerLeastVersion(data.data.android.least_supported_app);
           }
         } else {
@@ -212,7 +210,7 @@ const Splash = ({navigation}) => {
         // compareAppVersionWithStoreVersion(JSON.stringify(apiResponse));
       })
       .catch(error => {
-        console.log('Error Alert!: ' + error);
+        // console.log('Error Alert!: ' + error);
         //Previous error --- Cannot read property 'least_supported_app' of undefined
         Alert.alert('Alert!', 'Something went wrong, please try later.');
       })
@@ -230,35 +228,17 @@ const Splash = ({navigation}) => {
     return countOfChar;
   }
   function compareAppVersionWithStoreVersion() {
-    // setLoading(false);
-    // const iOSLatestVersion = apiResponse.data.ios.latest_app_version;
-    // const iOSLeastSupportedVersion =
-    //   apiResponse.data.ios.least_supported_version;
     const iOSLeastSupportedVersion = serverLeastVersion;
-    // const androidLatestVersion = apiResponse.data.android.latest_app_version;
-    // const androidLeastSupportedVersion =
-    //   apiResponse.data.android.least_supported_version;
     const androidLeastSupportedVersion = serverLeastVersion;
     var localDeviceInfoForAndroid = DeviceInfo.getVersion();
     var localDeviceInfoForiOS = DeviceInfo.getVersion();
-
-    // console.log('iOSLatestVersion', iOSLatestVersion);
-    // console.log('androidLatestVersion', androidLatestVersion);
-
-    // console.log('parseFloat(iOSLeastSupportedVersion)',parseFloat(parseFloat(iOSLeastSupportedVersion).toFixed(2)));
-    // console.log(
-    //   'parseFloat(localDeviceInfoForiOS)',
-    //   parseFloat(localDeviceInfoForiOS),
-    // );
-    // return;
-    // console.log('parseFloat(iOSLatestVersion)',parseFloat(parseFloat(iOSLatestVersion).toFixed(2)));
-    console.log('######### Comparision Started #########');
+    // console.log('######### Comparision Started #########');
     if (Platform.OS === 'ios') {
-      console.log('iOSLeastSupportedVersion', iOSLeastSupportedVersion);
-      console.log(
-        'localDeviceInfoForiOS before convert',
-        localDeviceInfoForiOS,
-      );
+      // console.log('iOSLeastSupportedVersion', iOSLeastSupportedVersion);
+      // console.log(
+      //   'localDeviceInfoForiOS before convert',
+      //   localDeviceInfoForiOS,
+      // );
       // if (localDeviceInfoForiOS.length < 6) {
       //   localDeviceInfoForiOS = localDeviceInfoForiOS + '.0';
       // }
@@ -266,9 +246,9 @@ const Splash = ({navigation}) => {
       if (val === 1) {
         localDeviceInfoForiOS = localDeviceInfoForiOS + '.0';
       }
-      console.log('localDeviceInfoForiOS after', localDeviceInfoForiOS);
+      // console.log('localDeviceInfoForiOS after', localDeviceInfoForiOS);
       if (semver.lt(localDeviceInfoForiOS, iOSLeastSupportedVersion)) {
-        console.log('Least version is greater so navigate user to AppStore');
+        // console.log('Least version is greater so navigate user to AppStore');
         Alert.alert(
           'Alert!',
           'To keep using the Babas app, please download the latest version.',
@@ -277,19 +257,19 @@ const Splash = ({navigation}) => {
               text: 'Ok',
               onPress: () => {
                 setNavigateToStore(true);
-                console.log('navigate user to App store.');
+                // console.log('navigate user to App store.');
                 navigateToAppStore();
               },
             },
           ],
         );
       } else {
-        console.log('Navigate User to regular screen');
+        // console.log('Navigate User to regular screen');
         navigateUserToParticularScreen();
       }
     } else {
-      console.log('androidLeastSupportedVersion', androidLeastSupportedVersion);
-      console.log('localDevInfoAndroid bef_convert', localDeviceInfoForAndroid);
+      // console.log('androidLeastSupportedVersion', androidLeastSupportedVersion);
+      // console.log('localDevInfoAndroid bef_convert', localDeviceInfoForAndroid);
       // if (localDeviceInfoForAndroid.length < 6) {
       //   localDeviceInfoForAndroid = localDeviceInfoForAndroid + '.0';
       // }
@@ -297,11 +277,11 @@ const Splash = ({navigation}) => {
       if (val === 1) {
         localDeviceInfoForAndroid = localDeviceInfoForAndroid + '.0';
       }
-      console.log('localDeviceInfoAndroid after', localDeviceInfoForAndroid);
+      // console.log('localDeviceInfoAndroid after', localDeviceInfoForAndroid);
       if (semver.lt(localDeviceInfoForAndroid, androidLeastSupportedVersion)) {
-        console.log(
-          'Least supported version is greater so navigate user to PlayStore',
-        );
+        // console.log(
+        //   'Least supported version is greater so navigate user to PlayStore',
+        // );
         Alert.alert(
           'Alert!',
           'To keep using the Babas app, please download the latest version.',
@@ -310,14 +290,14 @@ const Splash = ({navigation}) => {
               text: 'Ok',
               onPress: () => {
                 setNavigateToStore(true);
-                console.log('navigate user to Play store.');
+                // console.log('navigate user to Play store.');
                 navigateToPlayStore();
               },
             },
           ],
         );
       } else {
-        console.log('Navigate User to regular screen');
+        // console.log('Navigate User to regular screen');
         navigateUserToParticularScreen();
       }
     }
@@ -336,10 +316,10 @@ const Splash = ({navigation}) => {
   // }, 2000);
 
   const navigateUserToParticularScreen = () => {
-    console.log('navigation started here.....');
+    // console.log('navigation started here.....');
     // setTextOnUI('navigation started here....');
     setTimeout(() => {
-      console.log('timer stated after 2 secs');
+      // console.log('timer stated after 2 secs');
       // setTextOnUI('timer stated after 2 secs');
       AsyncStorage.getItem('screen', (_err, item) => {
         console.log(
@@ -364,20 +344,20 @@ const Splash = ({navigation}) => {
             }
           });
         } else {
-          console.log(
-            `isDataAvailable ${isDataAvailable} and 
-            dataArray length-  ${dataArray.length} in navigation and 
-            count val- ${count}`,
-          );
+          // console.log(
+          //   `isDataAvailable ${isDataAvailable} and 
+          //   dataArray length-  ${dataArray.length} in navigation and 
+          //   count val- ${count}`,
+          // );
           if (isDataAvailable && count === 2) {
-            console.log(
-              `isDataAvailable ${isDataAvailable} 
-              and dataArray length ${dataArray.length} in navigation in if condition`,
-            );
+            // console.log(
+            //   `isDataAvailable ${isDataAvailable} 
+            //   and dataArray length ${dataArray.length} in navigation in if condition`,
+            // );
             // if (isDataAvailable) {
             if (dataArray.length <= 0) {
               AsyncStorage.getItem('privacyAccepted', (_err, item) => {
-                console.log('item ::: 222 === ' + item);
+                // console.log('item ::: 222 === ' + item);
                 if (item === '0' || item === null) {
                   navigation.reset({
                     index: 0,
@@ -453,9 +433,10 @@ const Splash = ({navigation}) => {
               NetInfo.fetch().then(state => {
                 if (state.isConnected) {
                   fetchAppVersionDetails();
-                } else {
-                  console.log('No internet connection available');
                 }
+                // else {
+                //   console.log('No internet connection available');
+                // }
               });
             }}
             style={splashPageStyels.btn_refresh}>
@@ -482,7 +463,6 @@ const Splash = ({navigation}) => {
         )}
       </View>
       <Modal isVisible={loading} style={splashPageStyels.modal}>
-        {/* isVisisble ? view wilbe visible : null() */}
         <ActivityIndicator color={'#fff'} />
       </Modal>
     </View>
@@ -490,131 +470,3 @@ const Splash = ({navigation}) => {
 };
 
 export default Splash;
-
-// import React, { useEffect, useState } from 'react';
-// import {
-//     Image, StatusBar, View
-// } from 'react-native';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { openDatabase } from 'react-native-sqlite-storage';
-// import { splashPageStyels } from '../utils/styles';
-
-// var db = openDatabase({ name: 'BABAS_DB.db' });
-
-// const Splash = ({ navigation }) => {
-//     const [dataArray, setDataArray] = useState([]);
-//     const [isDataAvailable, setDataAvailable] = useState(false);
-//     const [count, setCount] = useState(1);
-
-//     useEffect(() => {
-//         console.log('useEffect Called.');
-//         console.log('AsyncStorage.getItem ; :: ' + AsyncStorage.getItem('screen', (err, item) => console.log('Sohel :' + item)));
-//         setCount(count + 1);
-
-//         // This method to get the user datafrom local DB
-//         db.transaction((tx) => {
-//             tx.executeSql(
-//                 'SELECT * FROM user',
-//                 [],
-//                 (tx, results) => {
-//                     var temp = [];
-//                     for (let i = 0; i < results.rows.length; ++i) {
-//                         temp.push(results.rows.item(i));
-//                     }
-//                     console.log('first time in splash screen')
-//                     setDataArray(temp);
-//                     setDataAvailable(true);
-//                 }
-//             );
-//         });
-//     }, []);
-
-//     // This function is to set time out for splash screen
-//     setTimeout(() => {
-//       console.log('check isDataavailable val', isDataAvailable);
-//         AsyncStorage.getItem('screen', (err, item) => {
-//           console.log('item---', item);
-//             if (item === null) {
-//                 AsyncStorage.getItem('privacyAccepted', (err, item) => {
-//                     console.log("item ::: 111 === " + item);
-//                     if (item === '0' || item === null) {
-//                         navigation.reset({
-//                             index: 0,
-//                             routes: [{ name: 'Privacy' }],
-//                         });
-//                     } else {
-//                         AsyncStorage.setItem('screen', 'Login')
-//                         navigation.reset({
-//                             index: 0,
-//                             routes: [{ name: 'Login' }],
-//                         });
-//                     }
-//                 })
-//             } else {
-//               console.log(`isDataAvailable ${isDataAvailable} count ${count} in else condition`);
-//                 if (isDataAvailable && count === 2) {
-//                     if (dataArray.length <= 0) {
-//                         AsyncStorage.getItem('privacyAccepted', (err, item) => {
-//                             console.log("item ::: 222 === " + item);
-//                             if (item === '0' || item === null) {
-//                                 navigation.reset({
-//                                     index: 0,
-//                                     routes: [{ name: 'Privacy' }],
-//                                 });
-//                             } else {
-//                                 AsyncStorage.setItem('screen', 'Login')
-//                                 navigation.reset({
-//                                     index: 0,
-//                                     routes: [{ name: 'Login' }],
-//                                 });
-//                             }
-//                         })
-//                     } else if (dataArray[0].userRole == 3) {
-//                         AsyncStorage.setItem('screen', 'EmployeeHome')
-//                         navigation.reset({
-//                             index: 0,
-//                             routes: [{
-//                                 name: 'EmployeesHomeDrawer',
-//                                 screen: "EmployeesHome"
-//                             }],
-//                         });
-//                     } else if (dataArray[0].userRole == 2) {
-//                         AsyncStorage.setItem('screen', 'SupervisorHome')
-//                         navigation.reset({
-//                             index: 0,
-//                             routes: [{
-//                                 name: 'SuperVisorHomeDrawer',
-//                                 screen: "SuperVisorHome"
-//                             }],
-//                         });
-//                     } else if (dataArray[0].userRole == 1) {
-//                         AsyncStorage.setItem('screen', 'AdminDashboard')
-//                         navigation.reset({
-//                             index: 0,
-//                             routes: [{
-//                                 name: 'AdminHomeDrawer',
-//                                 screen: "AdminDashboard"
-//                             }],
-//                         });
-//                     }
-//                 }
-//             }
-//         });
-//     }, 2000);
-
-//     // This function is to set the UI
-//     return (
-//         <View style={splashPageStyels.container}>
-//             <StatusBar barStyle="light-content"
-//                 backgroundColor="#FA0F0A" />
-//             <View>
-//                 <Image
-//                     style={splashPageStyels.logo_image}
-//                     source={require('../assets/images/logo.png')}
-//                 />
-//             </View>
-//         </View>
-//     );
-// };
-
-// export default Splash;

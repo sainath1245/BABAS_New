@@ -20,7 +20,8 @@ import {
     Alert,
     Dimensions,
     Image,
-    Text
+    Text,
+    ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
@@ -67,24 +68,32 @@ import DeviceInfo from 'react-native-device-info';
 import NonBabasLogin from "../screens/NonBabasLogin";
 import NonBabasDashboard from "../screens/NonBabasDashboard";
 import Privacy from "../screens/Privacy";
+import Modal from 'react-native-modal';
+import SuperVisorNotificationDetail from "../screens/SuperVisorNotificationDetail";
 
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
 var db = openDatabase({ name: 'BABAS_DB.db' });
 
 const CustomDrawerContent = (props) => {
-    const dispatch = useDispatch();
-    const navigation = useNavigation();
-    const [name, setName] = React.useState('');
-    const [userId, setUserId] = React.useState('');
-    const [isConnected, setConnected] = React.useState();
-    const [email, setEmail] = React.useState('');
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const [name, setName] = React.useState('');
+  const [userId, setUserId] = React.useState('');
+  const [isConnected, setConnected] = React.useState();
+  const [email, setEmail] = React.useState('');
+  const [userRole, setUserRole] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [token, setToken] = React.useState('');
 
     AsyncStorage.getItem('loginUserEmail', (err, item) => {
         console.log('--notificationCount-- loginUserEmail: ' + item)
         setEmail(item)
         // setEmail(item)
     })
+    AsyncStorage.getItem('token', (err, item) => {
+        setToken(item);
+    });
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
     const checkInternet = () => {
@@ -148,14 +157,14 @@ const CustomDrawerContent = (props) => {
             .then((data) => {
                 console.log('==== resp  onseCode==== ' + JSON.stringify(data));
                 let json = data;
-                if (json.responseCode == 200) {
-                    console.log('--json.data.attendaceHistories--' + json.data.attendaceHistories)
-                    AsyncStorage.setItem('lastAction', '');
-                    AsyncStorage.setItem('token', '');
-                    notificationStore.dispatch({
-                        type: "COUNT_CHANGE",
-                        payload: { count: '0' }
-                    });
+        if (json.responseCode == 200) {
+          console.log('attendaceHistories' + json.data.attendaceHistories);
+          AsyncStorage.setItem('lastAction', '');
+          AsyncStorage.setItem('token', '');
+          notificationStore.dispatch({
+            type: 'COUNT_CHANGE',
+            payload: {count: 0},
+          });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);
                     deleteTableAllClockRequest(db);
@@ -178,6 +187,110 @@ const CustomDrawerContent = (props) => {
             });
     }
 
+  const downloadFileBtnPressed = item => {
+    NetInfo.fetch().then(state => {
+      if (state.isConnected) {
+        setLoading(true);
+        downloadFileManually();
+      } else {
+        Alert.alert(
+          'Alert!',
+          'Please check your internet connection to download file.',
+        );
+      }
+    });
+  };
+  const downloadFileManually = async () => {
+    var uID = parseInt(userId);
+    var requestOptions = '';
+    requestOptions = {
+      method: 'POST',
+      headers: {Authorization: 'Bearer ' + token},
+    };
+    console.log('requestOptions.body for download file' + requestOptions.body);
+    let url = BASE_URL + `admin/downloadmanually?userID=${uID}`;
+    // console.log('URL for manual download--', url);
+    await fetch(url, requestOptions)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong');
+        }
+      })
+      .then(data => {
+        // console.log('data ' + JSON.stringify(data));
+        let json = data;
+        if (json.responseCode == 200) {
+        //   console.log('response for download file --', json.data);
+          Alert.alert('Alert', 'File has been downloaded successfully.');
+        } else {
+          Alert.alert('Alert!', json.data.responseMessage);
+        }
+      })
+      .catch(error => {
+        // console.log('==ERROR in catch == : ' + error);
+        Alert.alert('Alert!', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+  const generateAttendenceBtnPressed = item => {
+    NetInfo.fetch().then(state => {
+      if (state.isConnected) {
+        setLoading(true);
+        generateAttendenceReport();
+      } else {
+        Alert.alert(
+          'Alert!',
+          'Please check your internet connection to generate attendance report.',
+        );
+      }
+    });
+  };
+  const generateAttendenceReport = async () => {
+    var requestOptions = '';
+    requestOptions = {
+      method: 'POST',
+      headers: {Authorization: 'Bearer ' + token},
+    };
+    // console.log(
+    //   'requestOptions.body for generate attendance report',
+    //   requestOptions,
+    // );
+    let url = BASE_URL + 'Admin/DownloadExcelSummary';
+    // console.log('summary URL --', url);
+    await fetch(url, requestOptions)
+      .then(response => {
+        console.log('res--', response);
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong for attendance report');
+        }
+      })
+      .then(data => {
+        // console.log('data for attendance report' + JSON.stringify(data));
+        let json = data;
+        if (json.responseCode == 200) {
+          //   console.log('response for attendance report --', json.data);
+          Alert.alert(
+            'Alert',
+            'Attendance report has been generated successfully.',
+          );
+        } else {
+          Alert.alert('Alert!', json.data.responseMessage);
+        }
+      })
+      .catch(error => {
+        // console.log('==ERROR== : ' + error);
+        Alert.alert('Alert!', error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
     const checkInternetForDeactivateAccount = () => {
         NetInfo.fetch().then(state => {
@@ -250,10 +363,10 @@ const CustomDrawerContent = (props) => {
                                     console.log('--json.data.attendaceHistories--' + json.data.attendaceHistories)
                                     AsyncStorage.setItem('lastAction', '');
                                     AsyncStorage.setItem('token', '');
-                                    notificationStore.dispatch({
-                                        type: "COUNT_CHANGE",
-                                        payload: { count: '0' }
-                                    });
+                notificationStore.dispatch({
+                  type: 'COUNT_CHANGE',
+                  payload: {count: 0},
+                });
                                     dispatch(clearLogin());
                                     deleteTableAllRows(db);
                                     deleteTableAllClockRequest(db);
@@ -280,27 +393,120 @@ const CustomDrawerContent = (props) => {
             });
     }
 
-    React.useEffect(() => {
-        // This function to get userId and userName from local DB
-        db.transaction((tx) => {
-            tx.executeSql(
-                'SELECT * FROM user',
-                [],
-                (tx, results) => {
-                    console.log('ssssss' + results.rows.item(0).email);
-                    setName(results.rows.item(0).firstName);
-                    setUserId(results.rows.item(0).userId);
-                }
-            );
-        });
-    }, [])
+  React.useEffect(() => {
+    // This function to get userId and userName from local DB
+    db.transaction(tx => {
+      tx.executeSql('SELECT * FROM user', [], (tx, results) => {
+        console.log('ssssss' + results.rows.item(0).email);
+        setUserRole(results.rows.item(0).userRole);
+        setName(results.rows.item(0).firstName);
+        setUserId(results.rows.item(0).userId);
+      });
+    });
+  }, []);
 
-    // This function is to set Drawer UI 
-    return (
-        <DrawerContentScrollView {...props}
-            contentContainerStyle={{ flex: 1, justifyContent: 'space-between' }}>
-            <View style={{ justifyContent: 'flex-start' }}>
-                <DrawerItemList {...props} />
+  // This function is to set Drawer UI
+  return (
+    <DrawerContentScrollView
+      {...props}
+      contentContainerStyle={{
+        flex: 1,
+        justifyContent: 'space-between',
+        minHeight: 790,
+      }}>
+      <>
+        <Modal
+          isVisible={loading}
+          style={{
+            position: 'relative',
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator color={'#fff'} />
+        </Modal>
+        <View style={{justifyContent: 'flex-start'}}>
+          <DrawerItemList {...props} />
+          {userRole == 1 ? (
+            <>
+              <DrawerItem
+                label={() => (
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 16,
+                      marginLeft: -16,
+                    }}>
+                    Manual Download
+                  </Text>
+                )}
+                icon={() => (
+                  <Image
+                    style={loginPageStyles.svg_icons}
+                    source={require('../assets/images/manual_download.png')}
+                  />
+                )}
+                onPress={() => {
+                  Alert.alert(
+                    'Alert!',
+                    'Are you sure you want to download file manually?',
+                    [
+                      {
+                        text: 'Cancel',
+                        onPress: () => console.log('Cancel Pressed'),
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Download',
+                        onPress: () => {
+                          downloadFileBtnPressed();
+                        },
+                      },
+                    ],
+                  );
+                }}
+              />
+              <DrawerItem
+                label={() => (
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 16,
+                      marginLeft: -16,
+                    }}>
+                    Attendance Report
+                  </Text>
+                )}
+                icon={() => (
+                  <Image
+                    style={loginPageStyles.svg_icons}
+                    source={require('../assets/images/attendence_report.png')}
+                  />
+                )}
+                onPress={() => {
+                  Alert.alert(
+                    'Alert!',
+                    'Are you sure you want to generate attendance report?',
+                    [
+                      {
+                        text: 'Cancel',
+                        onPress: () => console.log('Cancel Pressed'),
+                        style: 'cancel',
+                      },
+                      {
+                        text: 'Submit',
+                        onPress: () => {
+                          generateAttendenceBtnPressed();
+                      },
+                    },
+                  ],
+                );
+              }}
+            />
+          </>
+        ) : null}
                 <DrawerItem
                     label={() =>
                         <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 16, marginLeft: -16 }}>
@@ -354,14 +560,6 @@ const CustomDrawerContent = (props) => {
                         });
                     }}
                 />
-                {/* <View style={{ marginLeft: 20, marginRight: 30 }}>
-                    <Text style={{ color: '#ffffff' }} ellipsizeMode="clip" numberOfLines={1}>
-                        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                        - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-                        - - - - - - - - - - - - - - - - -
-                    </Text>
-                </View> */}
                 <DrawerItem
                     label={() =>
                         <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 16, marginLeft: -16 }}>
@@ -394,8 +592,13 @@ const CustomDrawerContent = (props) => {
                         )
                     }}
                 />
-            </View>
-            <View style={{ marginBottom: 40, marginLeft: 20, flexDirection: 'column' }}>
+        </View>
+        <View
+          style={{
+            marginBottom: 40,
+            marginLeft: 20,
+            flexDirection: 'column',
+          }}>
                 {
                     email == '' || email == null ? <Text style={{ fontFamily: 'OpenSans-Semibold', bottom: 0, width: '100%', color: 'white', fontSize: 18, }}>
                         {userId}
@@ -410,8 +613,9 @@ const CustomDrawerContent = (props) => {
                 <Text style={{ fontFamily: 'OpenSans-Regular', bottom: 0, width: '100%', color: '#f0f0f0', fontSize: 14, marginTop: 6 }}>
                     App version: {getAppVersion()}
                 </Text>
-            </View>
-        </DrawerContentScrollView>
+        </View>
+      </>
+    </DrawerContentScrollView>
     );
 }
 
@@ -419,12 +623,12 @@ const CustomDrawerContent = (props) => {
 const EmployeesHomeDrawer = () => {
     const Drawer = createDrawerNavigator();
     const navigation = useNavigation();
-    const [notificationCount, setNotificationCount] = React.useState();
+  const [notificationCount, setNotificationCount] = React.useState();
 
-    notificationStore.subscribe(() => {
-        setNotificationCount(notificationStore.getState().count);
-        console.log('--store.getState()-- ' + notificationStore.getState().count)
-    })
+  notificationStore.subscribe(() => {
+    setNotificationCount(notificationStore.getState().count);
+    console.log('--store.getState()-- ' + notificationStore.getState().count);
+  });
 
     return (
         <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="EmployeesHome" screenOptions={{
@@ -476,14 +680,26 @@ const EmployeesHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
-                        <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                            <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                {notificationCount}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                ),
-            }} />
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+      />
             <Drawer.Screen name="History" component={EmployeesHistory} options={{
                 unmountOnBlur: true,
                 title: 'History', headerStyle: {
@@ -508,14 +724,26 @@ const EmployeesHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
-                        <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                            <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                {notificationCount}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                ),
-            }} />
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+      />
             <Drawer.Screen name="Change Password" component={EmployeesChangePassword} options={{
                 unmountOnBlur: true,
                 title: 'Change Password', headerStyle: {
@@ -540,14 +768,23 @@ const EmployeesHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
-                        <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                            <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                {notificationCount}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                ),
-            }} />
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white', fontSize: 10
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+      />
             <Drawer.Screen name="Help" component={Help} options={{
                 unmountOnBlur: true,
                 title: 'Help', headerStyle: {
@@ -572,16 +809,26 @@ const EmployeesHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
-                        <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                            <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                {notificationCount}
-                            </Text>
-                        </View>
-                    </TouchableOpacity>
-                ),
-            }} />
-        </Drawer.Navigator>
-    );
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+              )}
+            </TouchableOpacity>
+          ),
+        }}
+      />
+    </Drawer.Navigator>
+  );
 };
 
 // This function is to manage Supervisor Drawer 
@@ -590,10 +837,10 @@ const SuperVisorHomeDrawer = () => {
     const navigation = useNavigation();
     const [notificationCount, setNotificationCount] = React.useState();
 
-    notificationStore.subscribe(() => {
-        setNotificationCount(notificationStore.getState().count);
-        console.log('--store.getState()-- ' + notificationStore.getState().count)
-    })
+  notificationStore.subscribe(() => {
+    setNotificationCount(notificationStore.getState().count);
+    console.log('--store.getState()-- ' + notificationStore.getState().count);
+  });
 
     return (
         <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="SuperVisorHome" screenOptions={{
@@ -642,11 +889,15 @@ const SuperVisorHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
+                        {notificationCount > 0 ? (
                         <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                             <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                 {notificationCount}
                             </Text>
                         </View>
+                        ) : (
+                            <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                        )}
                     </TouchableOpacity>
                 ),
             }} />
@@ -674,11 +925,15 @@ const SuperVisorHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
+                        {notificationCount > 0 ? (
                         <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                             <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                 {notificationCount}
                             </Text>
                         </View>
+                        ) : (
+                            <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                        )}
                     </TouchableOpacity>
                 ),
             }} />
@@ -706,11 +961,15 @@ const SuperVisorHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
+                        {notificationCount > 0 ? (
                         <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                             <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                 {notificationCount}
                             </Text>
                         </View>
+                        ): (
+                            <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                        )}
                     </TouchableOpacity>
                 ),
             }} />
@@ -746,11 +1005,15 @@ const SuperVisorHomeDrawer = () => {
                                 style={loginPageStyles.svg_bell_icons}
                                 source={require('../assets/images/notification.png')}
                             />
+                            {notificationCount > 0 ? (
                             <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                                 <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                     {notificationCount}
                                 </Text>
                             </View>
+                            ) : (
+                                <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                            )}
                         </TouchableOpacity>
                     </View>
             }} />
@@ -778,11 +1041,15 @@ const SuperVisorHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
+                        {notificationCount > 0 ? (
                         <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                             <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                 {notificationCount}
                             </Text>
                         </View>
+                        ) : (
+                            <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                        )}
                     </TouchableOpacity>
                 ),
             }} />
@@ -810,11 +1077,15 @@ const SuperVisorHomeDrawer = () => {
                             style={loginPageStyles.svg_bell_icons}
                             source={require('../assets/images/notification.png')}
                         />
+                        {notificationCount > 0 ? (
                         <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                             <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                 {notificationCount}
                             </Text>
                         </View>
+                        ) : (
+                            <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                        )}
                     </TouchableOpacity>
                 ),
             }} />
@@ -1050,6 +1321,7 @@ const MyStack = () => {
                 <Stack.Screen name="SuperVisorHistory" component={SuperVisorHistory} />
                 <Stack.Screen name="SuperVisorApprovalHistory" component={SuperVisorApprovalHistory} />
                 <Stack.Screen name="SuperVisorHistoryDetail" component={SuperVisorHistoryDetail} />
+                <Stack.Screen name="SuperVisorNotificationDetail" component={SuperVisorNotificationDetail} />
 
                 {/* Admin Screens */}
                 <Stack.Screen name="AdminSelectNewApprover" component={AdminSelectNewApprover} />

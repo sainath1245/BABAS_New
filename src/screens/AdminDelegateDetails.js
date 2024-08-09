@@ -17,6 +17,7 @@ import { adminDelegateDetails, clockInPageStyles, employeesForgotPasswordPageSty
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from 'native-base';
 import moment from 'moment';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 const AdminDelegateDetails = ({ route, navigation }) => {
@@ -25,15 +26,15 @@ const AdminDelegateDetails = ({ route, navigation }) => {
     const [minDate, setMinDate] = useState(new Date());
     const [reason, setReason] = useState();
 
-    const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
+    const [show, setShow] = useState(false);
     const [dobToShow, setDOBToShow] = useState('Select Date');
 
-    const [show_1, setShow_1] = useState(Platform.OS === 'ios' ? true : false);
+    const [show_1, setShow_1] = useState(false);
     const [dobToShow_1, setDOBToShow_1] = useState('Select Date');
 
     const { supervisorID, newApproverId } = route.params;
 
-    console.log(supervisorID, newApproverId)
+    console.log(supervisorID, newApproverId);
 
     const [loading, setLoading] = useState(false);
     const [isConnected, setConnected] = useState();
@@ -43,7 +44,7 @@ const AdminDelegateDetails = ({ route, navigation }) => {
 
     useEffect(() => {
         // This piece of code sets the Date for UI
-        var today = new Date();
+        // var today = new Date();
         // var formattedDate = format(today, "dd/MM/yyyy");
         // setMinDate(formattedDate);
 
@@ -72,7 +73,6 @@ const AdminDelegateDetails = ({ route, navigation }) => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
-                setLoading(true)
                 callSuperVisorDelegation();
             } else {
                 Alert.alert(
@@ -84,14 +84,48 @@ const AdminDelegateDetails = ({ route, navigation }) => {
         });
         return (isConnected);
     }
+  const hideCancelPickerForStart = () => {
+    setShow(false);
+  };
+  const handleConfirmPickerForStart = date => {
+    const currentDate = date;
+    console.log('Start Date', moment(currentDate).format('DD/MM/YYYY'));
+    setShow(false);
+    setDOBToShow(moment(currentDate).format('DD/MM/YYYY'));
+    setStartDate(currentDate);
+    setDOBToShow_1('Select Date');
+  };
 
+  const hideCancelPickerForEnd = () => {
+    setShow_1(false);
+  };
+  const handleConfirmPickerForEnd = date => {
+    const currentDate = date;
+    console.log('End Date', moment(currentDate).format('DD/MM/YYYY'));
+    setShow_1(false);
+    setDOBToShow_1(moment(currentDate).format('DD/MM/YYYY'));
+    setEndDate(currentDate);
+  };
     // This function is to send deligation data to server
     callSuperVisorDelegation = async () => {
-        var startDateToSend_1 = format(startDate, "yyyy-MM-dd");
-        var endDateToSend_1 = format(endDate, "yyyy-MM-dd");
-        var number = parseInt(userId);
-        var number_1 = parseInt(supervisorID);
-        var number_2 = parseInt(newApproverId);
+    if (dobToShow == 'Select Date') {
+      Alert.alert('Alert!', 'Start date cannot be empty.');
+      return;
+    } else if (dobToShow_1 == 'Select Date') {
+      Alert.alert('Alert!', 'End date cannot be empty.');
+      return;
+    } else if (reason == '' || reason == undefined) {
+      Alert.alert('Alert!', 'Reason cannot be empty.');
+      return;
+    }
+    var startDateToSend_1 = format(startDate, "yyyy-MM-dd");
+    var endDateToSend_1 = format(endDate, "yyyy-MM-dd");
+    var number = parseInt(userId);
+    var number_1 = parseInt(supervisorID);
+    var number_2 = parseInt(newApproverId);
+    console.log('startDateToSend_1 ', startDateToSend_1);
+    console.log('endDateToSend_1', endDateToSend_1);
+    setLoading(true);
         const requestOptions = {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -180,21 +214,8 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                         style={loginPageStyles.svg_icons}
                                         source={require('../assets/images/calendar.png')}
                                     />
-                                    {/* <DatePicker
-                                        customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                                        date={startDate}
-                                        mode="date"
-                                        placeholder="Select date"
-                                        format="DD/MM/YYYY"
-                                        minDate={minDate}
-                                        maxDate={endDate}
-                                        confirmBtnText="Confirm"
-                                        cancelBtnText="Cancel"
-                                        showIcon={false}
-                                        onDateChange={onChange}
-                                    /> */}
-                                    <View style={{}}>
-                                        {
+                                    <View style={{flex: 1}}>
+                                        {/* {
                                             Platform.OS === 'android' ?
                                                 <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                     setShow(true);
@@ -210,8 +231,17 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                                     <Text style={{ color: 'black' }}>
                                                     </Text>
                                                 </Button>
-                                        }
-                                        {show && (
+                                        } */}
+                    <Button
+                      backgroundColor={'white'}
+                      onPress={() => {
+                        setShow(true);
+                      }}>
+                      <Text style={{color: 'black', alignSelf: 'flex-start'}}>
+                        {dobToShow}
+                      </Text>
+                    </Button>
+                    {/* {show && (
                                             <DateTimePicker
                                                 style={{ position: 'absolute' }}
                                                 testID="dateTimePicker"
@@ -227,9 +257,17 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                                     setStartDate(currentDate);
                                                 }}
                                             />
-                                        )}
-                                    </View>
-                                </View>
+                                        )} */}
+                    <DateTimePickerModal
+                      isVisible={show}
+                      mode="date"
+                      date={startDate}
+                      minimumDate={minDate}
+                      onConfirm={handleConfirmPickerForStart}
+                      onCancel={hideCancelPickerForStart}
+                    />
+                  </View>
+                </View>
                                 <Text style={adminDelegateDetails.delegate_text}>
                                     Delegate Date To
                                 </Text>
@@ -250,8 +288,8 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                         showIcon={false}
                                         onDateChange={(dateStr, date) => { setEndDate(date) }}
                                     /> */}
-                                    <View style={{}}>
-                                        {
+                                    <View style={{flex: 1}}>
+                                        {/* {
                                             Platform.OS === 'android' ?
                                                 <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                     setShow_1(true);
@@ -267,8 +305,16 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                                     <Text style={{ color: 'black' }}>
                                                     </Text>
                                                 </Button>
-                                        }
-                                        {show_1 && (
+                                        } */}
+                    <Button backgroundColor={'white'}
+                      onPress={() => {
+                        setShow_1(true);
+                      }}>
+                      <Text style={{color: 'black', alignSelf: 'flex-start'}}>
+                        {dobToShow_1}
+                      </Text>
+                    </Button>
+                    {/* {show_1 && (
                                             <DateTimePicker
                                                 style={{ position: 'absolute' }}
                                                 testID="dateTimePicker"
@@ -283,9 +329,17 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                                     setEndDate(currentDate);
                                                 }}
                                             />
-                                        )}
-                                    </View>
-                                </View>
+                                        )} */}
+                    <DateTimePickerModal
+                      isVisible={show_1}
+                      mode="date"
+                      date={endDate}
+                      minimumDate={startDate}
+                      onConfirm={handleConfirmPickerForEnd}
+                      onCancel={hideCancelPickerForEnd}
+                    />
+                  </View>
+                </View>
                                 <Text style={adminDelegateDetails.delegate_text}>
                                     Delegate Reason
                                 </Text>
@@ -313,7 +367,7 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                         } else {
                                             Alert.alert(
                                                 "Alert!",
-                                                "Start Date, End Date & Delegate Reason should not be empty.",
+                                                "Start Date, End Date & Delegate reason should not be empty.",
                                             )
                                         }
                                     }}

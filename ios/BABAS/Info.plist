@@ -31,9 +31,9 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Your camera is used to capture an image for Clock-In/Clock-Out.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>It is necessary to enable location permission to use the basic features of the application, which is clock in/out functionality. Clock in/out cannot be performed without location permission.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>It is necessary to enable location permission to use the basic features of the application, which is clock in/out functionality. Clock in/out cannot be performed without location permission.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>It is necessary to enable location permission to use the basic features of the application, which is clock in/out functionality. Clock in/out cannot be performed without location permission.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Your camera is used to capture an image for Clock-In/Clock-Out.</string>
@@ -50,6 +50,11 @@
 		<string>OpenSans-Regular.ttf</string>
 		<string>OpenSans-Semibold.ttf</string>
 		<string>OpenSans-SemiboldItalic.ttf</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string></string>

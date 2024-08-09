@@ -3,6 +3,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { useIsFocused } from '@react-navigation/core';
 import { format } from "date-fns";
 import React, {
+    useCallback,
     useEffect,
     useState
 } from 'react';
@@ -19,7 +20,7 @@ import {
     View
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DatePicker from 'react-native-datepicker';
+// import DatePicker from 'react-native-datepicker';
 import { TextInput } from 'react-native-gesture-handler';
 import Modal from "react-native-modal";
 import ModalDropdown from 'react-native-modal-dropdown';
@@ -41,6 +42,8 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from "native-base";
 import moment from 'moment';
+import { useFocusEffect, useNavigationState } from '@react-navigation/native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 const SuperVisorEmpRequestes = ({ navigation }) => {
@@ -72,15 +75,14 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
     const [endDate_1, setEndDate_1] = useState(new Date());
     const [dateToShow, setDateToShow] = useState('Select Date');
     const [dateToShow_1, setDateToShow_1] = useState('Select Date');
-    const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
-    const [show_1, setShow_1] = useState(Platform.OS === 'ios' ? true : false);
-
-    // This function is to get dynamic height of the UI comment
-    const onLayout = (event) => {
-        const { x, y, height, width } = event.nativeEvent.layout;
-        setItemHeight(height);
-    }
-
+    const [show, setShow] = useState(false);
+    const [show_1, setShow_1] = useState(false);
+//   const [isScreenFocused, setIsScreenFocused] = useState(false);
+  // This function is to get dynamic height of the UI comment
+  const onLayout = event => {
+    const {height} = event.nativeEvent.layout;
+    setItemHeight(height);
+  };
     useEffect(() => {
         setNoDataMessage('User requests will appear here.')
         setLoading(true)
@@ -127,21 +129,41 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
         }, 1000);
 
         // This piece of code is to set Date * Time on UI
-        var today = new Date();
+        // var today = new Date();
         // var formattedDate = format(today, "dd/MM/yyyy");
         // setMaxDate(formattedDate);
 
-        today.setMonth(today.getMonth() - 2);
-        var formattedDate = format(today, "dd/MM/yyyy");
-        setMinDate(new Date(formattedDate));
-
+        // today.setMonth(today.getMonth() - 2);
+        // var formattedDate = format(today, "dd/MM/yyyy");
+        // setMinDate(new Date(formattedDate));
+    let date = moment().subtract(90, 'days').toDate();
+    setMinDate(date);
     }, [isFocused])
+
+  useFocusEffect(
+    useCallback(() => {
+      if (token != '') {
+        checkInternet();
+        console.log('calling here...');
+      } else {
+        console.log('calling here without token...');
+        AsyncStorage.getItem('token', (err, item) => {
+          setToken(item);
+        });
+        setTimeout(() => {
+          checkInternet();
+        }, 1000);
+      }
+    }, []),
+  );
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
     const checkInternet = () => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
+                setDataArray([]);
+                setLoading(true);
                 getRequestForApproval();
             } else {
                 setLoading(false);
@@ -155,12 +177,72 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
         });
         return (isConnected);
     }
-
+  const updateUserReadNotificationStatus = async (
+    status,
+    comment,
+    requestID,
+  ) => {
+    // console.log('entity requestID', requestID);
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        entityID: requestID,
+        userID: parseInt(userId),
+        isDelete: true,
+      }),
+    };
+    console.log('requestOptions for noti status' + requestOptions.body);
+    console.log('=======token====== ' + token);
+    await fetch(
+      BASE_URL + 'User/UpdateNotificationStatusByEntityID',
+      requestOptions,
+    )
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong :: ' + response.status);
+        }
+      })
+      .then(data => {
+        let json = data;
+        if (json.responseCode == 200) {
+          if (json.data.isSuccess) {
+            // console.log(
+            //   `status-${status}, comment-${comment},requestId-${requestID}`,
+            // );
+            //noti json stringfy {"responseCode":200,"responseMessage":"Success","data":{"notificationID":28082,"notificationCount":0,"isSuccess":true}}
+            var notificationCount = json.data.notificationCount;
+            notificationStore.dispatch({
+              type: 'COUNT_CHANGE',
+              payload: {count: notificationCount},
+            });
+            callApiForAccptReject(status, comment, requestID);
+          } else {
+            Alert.alert('Alert!', 'Unable to update status. Please try later.');
+          }
+          console.log('noti json stringfy ' + JSON.stringify(json));
+        } else {
+          Alert.alert('Alert!', dataArray.responseMessage);
+        }
+      })
+      .catch(error => {
+        console.log('niotifi ERROR: ' + error);
+      })
+      .finally(() => {
+        // setLoading(false);
+      });
+  };
     // This function is to Accept & Reject the clock in/out request 
-    callApiForAccptReject = async (status, comment, requestId) => {
-        console.log('------======-----==== requestId =====------- :: ' + requestId)
-        console.log('------======-----==== status =====------- :: ' + status)
-        console.log('------======-----==== comment =====------- :: ' + comment)
+    const callApiForAccptReject = async (status, comment, requestId) => {
+        // console.log('------======-----==== requestId =====------- :: ' + requestId)
+        // console.log('------======-----==== status =====------- :: ' + status)
+        // console.log('------======-----==== comment =====------- :: ' + comment)
+        setLoading(true);
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -170,7 +252,7 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                 comment: comment
             })
         };
-        console.log("JSON request body ::: ::: :   :   :   +++ :: " + requestOptions.body)
+        console.log("JSON request for RequestApproval" + requestOptions.body)
         await fetch(BASE_URL + 'Attendance/RequestApproval',
             requestOptions)
             .then(response => {
@@ -212,7 +294,7 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                 {
                                     text: "Ok",
                                     onPress: () => {
-                                        setDataArray([]); 89
+                                        setDataArray([]);
                                         setLoading(true);
                                         getRequestForApproval();
                                     }
@@ -244,8 +326,34 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
             return <Text style={{ fontFamily: 'OpenSans-Regular', color: '#000', fontSize: 11, fontWeight: "300", padding: 6 }}>{rowData.typeValue}</Text>
         }
     }
+  const hideCancelPickerForStartDate = () => {
+    setShow(false);
+  };
+  const hideCancelPickerForEndDate = () => {
+    setShow_1(false);
+  };
 
-    // This function is to get all the clock in/out requestes
+  const handleStartConfirm = date => {
+    const currentDate = date;
+    console.log('Start Date :::' + moment(currentDate).format('DD/MM/YYYY'));
+    setShow(false);
+    setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
+    setStartDate_1(currentDate);
+    setEndDate_1(currentDate);
+    setStartDate(currentDate);
+    setEndDate(currentDate);
+    setDateToShow_1('Select Date');
+  };
+  const handleEndConfirm = date => {
+    const currentDate = date;
+    console.log('End Date ::: ' + moment(currentDate).format('DD/MM/YYYY'));
+    setShow_1(false);
+    setDateToShow_1(moment(currentDate).format('DD/MM/YYYY'));
+    setEndDate_1(currentDate);
+    setEndDate(currentDate);
+  };
+
+  // This function is to get all the clock in/out requestes
     getRequestForApproval = async () => {
         console.log('startDate ::: ::: ' + startDate);
         console.log('endDate ::: ::: ' + endDate);
@@ -258,12 +366,12 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
         var newEndDate = '';
         if (startDate !== '') {
             var formattedDate = new Date(startDate);
-            var newStartDate = formattedDate.getUTCFullYear().toString() + "-" + (formattedDate.getMonth() + 1).toString() + "-" + formattedDate.getDate().toString();
-
-            var formattedDate_1 = new Date(endDate);
-            var newEndDate = formattedDate_1.getUTCFullYear().toString() + "-" + (formattedDate_1.getMonth() + 1).toString() + "-" + formattedDate_1.getDate().toString();
-
+            var newStartDate = formattedDate.getUTCFullYear().toString() + "/" + (formattedDate.getMonth() + 1).toString() + "/" + formattedDate.getDate().toString();
             console.log('newDate ::: ::: ' + newStartDate);
+        }
+        if (dateToShow_1 !== 'Select Date') {
+            var formattedDate_1 = new Date(endDate);
+            var newEndDate = formattedDate_1.getUTCFullYear().toString() + "/" + (formattedDate_1.getMonth() + 1).toString() + "/" + formattedDate_1.getDate().toString();
             console.log('newDate ::: ::: ' + newEndDate);
         }
 
@@ -419,9 +527,34 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={() => {
-                        setLoading(true)
                         setRequestId(item.requestId)
-                        callApiForAccptReject(1, "", item.requestId)
+                        Alert.alert('Alert!',
+                            'Are you sure, you want to approve the request.',
+                        [
+                                {
+                                    text: "Cancel",
+                                    onPress: () => console.log("Cancel Pressed"),
+                                    style: "cancel"
+                                },
+                                {
+                                    text: "Approve",
+                                    onPress: () => {
+                                        NetInfo.fetch().then(state => {
+                                            if (state.isConnected) {
+                                                updateUserReadNotificationStatus(1, '', item.requestId);
+                        // callApiForAccptReject(1, "", item.requestId)
+                                            } else {
+                                                Alert.alert(
+                                                    'Alert!',
+                                                    '(Offline) No internet connection. Please try again later.',
+                                                  );
+                                            }
+                                        })
+                                    }
+                                }
+                            ]
+                        )
+                        
                     }}
                     style={superVisorEmployeeRequestStyles.button_accept}>
                     <Text style={superVisorEmployeeRequestStyles.text_accept}>
@@ -507,7 +640,8 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                 if (comment != '') {
                                     setLoading(true);
                                     setRejectedPopupVisible(false);
-                                    callApiForAccptReject(2, comment, requestId);
+                                    updateUserReadNotificationStatus(2, comment, requestId);
+                                    // callApiForAccptReject(2, comment, requestId);
                                 } else {
                                     Alert.alert(
                                         "Alert!",
@@ -557,11 +691,17 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                     style={loginPageStyles.svg_bell_icons}
                                     source={require('../assets/images/notification.png')}
                                 />
+                                {notificationCount > 0 ? (
                                 <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
                                     <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
                                         {notificationCount}
                                     </Text>
                                 </View>
+                                ) : (
+                                    <View
+                                      style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                                    />
+                                  )}
                             </View>
                         </TouchableOpacity>
                         <KeyboardAwareScrollView style={{ marginBottom: 150 }} enableOnAndroid={true}>
@@ -575,26 +715,8 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                             style={loginPageStyles.svg_icons}
                                             source={require('../assets/images/calendar.png')}
                                         />
-                                        {/* <DatePicker
-                                            customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                                            date={startDate}
-                                            mode="date"
-                                            placeholder="Select date"
-                                            format="DD/MM/YYYY"
-                                            minDate={minDate}
-                                            maxDate={maxDate}
-                                            confirmBtnText="Confirm"
-                                            cancelBtnText="Cancel"
-                                            showIcon={false}
-                                            onDateChange={(dateStr, date) => {
-                                                setStartDate(date)
-                                                setEndDate(date)
-                                            }}
-                                        />
-                                        <View style={{flex: 1} }> for below line
-                                        */}
-                                        <View style={{}}>
-                                            {
+                                        <View style={{flex: 1}}>
+                                            {/* {
                                                 Platform.OS === 'android' ?
                                                     <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                         setShow(true);
@@ -608,10 +730,18 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         setShow(true);
                                                     }}>
                                                         <Text style={{ color: 'black' }}>
+                                                        {dateToShow}
                                                         </Text>
                                                     </Button>
-                                            }
-                                            {show && (
+                                            } */}
+                                            <Button backgroundColor={'white'} style={{}} onPress={() => {
+                                                        setShow(true);
+                                                    }}>
+                                                        <Text style={{ color: 'black' }}>
+                                                        {dateToShow}
+                                                        </Text>
+                                                    </Button>
+                                            {/* {show && (
                                                 <DateTimePicker
                                                     style={{ position: 'absolute', width: 200, alignSelf: 'flex-start' }}
                                                     testID="dateTimePicker"
@@ -622,10 +752,10 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                     onChange={(event, date) => {
                                                         const currentDate = date;
                                                         console.log("Start Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                        setShow(false);
+                                                        // setShow(false);
                                                         // {
-                                                        //     Platform.OS === 'android' ? 
-                                                        //     setShow(false) : null
+                                                            Platform.OS === 'android' ? 
+                                                            setShow(false) : null
                                                         // }
                                                         setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
 
@@ -636,7 +766,17 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         setEndDate(currentDate)
                                                     }}
                                                 />
-                                            )}
+                                            )} */}
+                                            <DateTimePickerModal 
+                                                style={{position: 'absolute', width: 200, alignSelf: 'flex-start'}}
+                                                value={startDate_1}
+                                                isVisible= {show}
+                                                minimumDate={minDate}
+                                                maximumDate={maxDate}
+                                                mode='date'
+                                                onCancel={hideCancelPickerForStartDate}
+                                                onConfirm={handleStartConfirm}
+                                                />
                                         </View>
                                     </View>
                                     <Text style={adminDelegateDetails.delegate_text}>
@@ -647,23 +787,9 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                             style={loginPageStyles.svg_icons}
                                             source={require('../assets/images/calendar.png')}
                                         />
-                                        {/* <DatePicker
-                                            customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                                            date={endDate}
-                                            mode="date"
-                                            placeholder="Select date"
-                                            format="DD/MM/YYYY"
-                                            minDate={startDate}
-                                            maxDate={maxDate}
-                                            confirmBtnText="Confirm"
-                                            cancelBtnText="Cancel"
-                                            showIcon={false}
-                                            onDateChange={(dateStr, date) => {
-                                                setEndDate(date)
-                                            }}
-                                        /> */}
-                                        <View style={{}}>
-                                            {
+                                        {/* <View style={{}}> */}
+                                        <View style={{flex: 1}}>
+                                            {/* {
                                                 Platform.OS === 'android' ?
                                                     <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                         setShow_1(true);
@@ -679,8 +805,15 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         <Text style={{ color: 'black' }}>
                                                         </Text>
                                                     </Button>
-                                            }
-                                            {show_1 && (
+                                            } */}
+                                            <Button backgroundColor={'white'} style={{}} onPress={() => {
+                                                        setShow_1(true);
+                                                    }}>
+                                                        <Text style={{ color: 'black', alignSelf: 'flex-start' }}>
+                                                            {dateToShow_1}
+                                                        </Text>
+                                                    </Button>
+                                            {/* {show_1 && (
                                                 <DateTimePicker
                                                     style={{ position: 'absolute', width: 200, alignSelf: 'flex-start' }}
                                                     testID="dateTimePicker"
@@ -691,18 +824,25 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                     onChange={(event, date) => {
                                                         const currentDate = date;
                                                         console.log("End Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                        setShow_1(false);
-                                                        // {
-                                                        //     Platform.OS === 'android' ? 
-                                                        //     setShow(false) : null
-                                                        // }
+                                                        // setShow_1(false);
+                                                        Platform.OS === 'android' ? 
+                                                        setShow(false) : null
                                                         setDateToShow_1(moment(currentDate).format("DD/MM/YYYY"))
 
                                                         setEndDate_1(currentDate)
                                                         setEndDate(currentDate)
                                                     }}
                                                 />
-                                            )}
+                                            )} */}
+                                            <DateTimePickerModal
+                isVisible={show_1}
+                mode="date"
+                date={endDate_1}
+                minimumDate={startDate_1}
+                maximumDate={maxDate}
+                onConfirm={handleEndConfirm}
+                onCancel={hideCancelPickerForEndDate}
+              />
                                         </View>
                                     </View>
                                     <Text style={adminDelegateDetails.delegate_text}>

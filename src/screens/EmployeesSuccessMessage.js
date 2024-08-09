@@ -71,13 +71,24 @@ const EmployeesSuccessMessage = ({ route, navigation }) => {
                                 style={loginPageStyles.svg_bell_icons}
                                 source={require('../assets/images/notification.png')}
                             />
-                            <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                                <Text style={{ fontFamily: 'OpenSans-Regular', color: 'white', fontSize: 10 }}>
-                                    {notificationCount}
-                                </Text>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
+            </View>
+          </TouchableOpacity>
                     <KeyboardAwareScrollView style={{ marginBottom: 150 }} enableOnAndroid={true}>
                         <View style={loginPageStyles.content_container}>
                             <View style={employeesSuccessMessagePageStyles.btn_container}>

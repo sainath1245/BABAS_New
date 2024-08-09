@@ -27,8 +27,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Modal from 'react-native-modal';
 import notificationStore from '../../notification_redux/notificationStore';
 import moment from 'moment';
-// import {useTimer} from '../utils/SessionContext';
-// import {startTimerBasedOnCondition} from '../utils/TimerComponent';
+import { backgroundColor, marginLeft } from 'styled-system';
 
 const EmployeesClockIn = ({route, navigation}) => {
   // const [tempData, setTempData] = useState('');
@@ -297,16 +296,22 @@ const EmployeesClockIn = ({route, navigation}) => {
                 style={loginPageStyles.svg_bell_icons}
                 source={require('../assets/images/notification.png')}
               />
-              <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
-                <Text
-                  style={{
-                    fontFamily: 'OpenSans-Regular',
-                    color: 'white',
-                    fontSize: 10,
-                  }}>
-                  {notificationCount}
-                </Text>
-              </View>
+              {notificationCount > 0 ? (
+                <View style={EmployeesUploadDocumentsPageStyles.circle_badge}>
+                  <Text
+                    style={{
+                      fontFamily: 'OpenSans-Regular',
+                      color: 'white',
+                      fontSize: 10,
+                    }}>
+                    {notificationCount}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
+              )}
             </View>
           </TouchableOpacity>
           <KeyboardAwareScrollView

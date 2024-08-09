@@ -252,18 +252,18 @@ const EmployeesHome = ({ navigation }) => {
                         AsyncStorage.setItem('lastAction', json.data.lastActionCode + '');
                         console.log('--notificationCount--json.data.notificationCount:: ' + json.data.notificationCount)
 
-                        var notificationCount = json.data.notificationCount;
+            var notificationCount = json.data.notificationCount;
 
-                        console.log('==json.data.isUserOnLeave==: ' + json.data.isUserOnLeave);
-                        console.log('==json.data.isUserOnLeave==:1 ' + json.data.isHoliday);
-                        console.log('==json.data.isUserOnLeave==:1 ' + json.data.desigination);
-                        setUserOnLeave(json.data.isUserOnLeave);
-                        setHoliday(json.data.isHoliday)
+            console.log('json.data.isUserOnLeave: ' + json.data.isUserOnLeave);
+            console.log('==json.data.isHoliday' + json.data.isHoliday);
+            console.log('==json.data.desigination' + json.data.desigination);
+            setUserOnLeave(json.data.isUserOnLeave);
+            setHoliday(json.data.isHoliday);
 
-                        notificationStore.dispatch({
-                            type: "COUNT_CHANGE",
-                            payload: { count: notificationCount + '' }
-                        });
+            notificationStore.dispatch({
+              type: 'COUNT_CHANGE',
+              payload: {count: notificationCount},
+            });
 
                         var length = json.data.workTypeList.length;
 
@@ -368,13 +368,13 @@ const EmployeesHome = ({ navigation }) => {
                 console.log('==== resp  onseCode==== ' + JSON.stringify(data));
                 let json = data;
                 if (json.responseCode == 200) {
-                    console.log('--json.data.attendaceHistories--' + json.data.attendaceHistories)
-                    AsyncStorage.setItem('lastAction', '');
-                    AsyncStorage.setItem('token', '');
-                    notificationStore.dispatch({
-                        type: "COUNT_CHANGE",
-                        payload: { count: '0' }
-                    });
+          console.log('emp-attendaceHistories--' + json.data.attendaceHistories)
+          AsyncStorage.setItem('lastAction', '');
+          AsyncStorage.setItem('token', '');
+          notificationStore.dispatch({
+            type: 'COUNT_CHANGE',
+            payload: {count: 0},
+          });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);
                     deleteTableAllClockRequest(db);

@@ -14,6 +14,7 @@ import { BASE_URL } from '../utils/consts';
 import { adminSuperVisorMapping, clockInPageStyles, EmployeesUploadDocumentsPageStyles, historyPageStyles, loginPageStyles } from '../utils/styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from "native-base";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 var width = Dimensions.get('window').width;
@@ -21,7 +22,7 @@ var width = Dimensions.get('window').width;
 const SuperVisorApprovalHistory = ({ navigation }) => {
     const dataAttendanceType = ['All', 'Approved', 'Rejected'];
     const [selectedValue, setSelectedValue] = useState('Type');
-    const [selectedValueToSend, setSelectedValueTosend] = useState(0);
+    const [selectedValueToSend, setSelectedValueTosend] = useState('All');
     const [item_height, setItemHeight] = useState(0);
     const [dataArray, setDataArray] = useState([])
     const [userId, setUserId] = useState('');
@@ -34,8 +35,10 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
     const [dateToSend, setDateToSend] = useState(null);
     const [maxDate, setMaxDate] = useState(new Date());
     const [dateToShow, setDateToShow] = useState('Select Date');
-    const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
-
+    // const [show, setShow] = useState(Platform.OS === 'ios' ? true : false);
+    const [show, setShow] = useState(false);
+  const minDate = moment().subtract(90, 'days').toDate();
+  const [originalArray, setOriginalArray] = useState([]);
     // This function is to get dynamic height of the UI component 
     const onLayout = (event) => {
         const { x, y, height, width } = event.nativeEvent.layout;
@@ -49,7 +52,6 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
         // var today = new Date();
         // var formattedDate = format(today, "dd/MM/yyyy");
         // setMaxDate(formattedDate);
-
         setLoading(true)
 
         // This functio to get userId from local DB
@@ -76,7 +78,38 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
         }, 2000);
 
     }, [])
-
+    
+      const hideCancelPicker = () => {
+        setShow(false);
+      };
+    
+      const handleConfirm = (date) => {
+    // console.warn('A date has been picked: ', date);
+    const currentDate = date;
+    // console.log('currentData-', currentDate);
+    // setDateToUI(currentDate);
+    setShow(false);
+    setDate(currentDate);
+    setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
+    // if (Platform.OS === 'ios') {
+    //     // const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
+    //     // const formattedDate = moment(date, "YYYY-MM-DD").format('dd/MM/yyyy')
+                                        //     const formattedDate = format(currentDate, 'dd/MM/yyyy')
+                                        //     console.log('formateed in iOS--', formattedDate);
+                                        //     setDateToSend(formattedDate);
+                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
+                                        // } else {
+                                        //     var formattedDate_1 = format(currentDate, "dd/MM/yyyy");
+                                        //     console.log('formated in android --', formattedDate_1);
+                                        //     setDateToSend(formattedDate_1);
+                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
+                                        // }
+    const formattedDate = format(currentDate, 'dd/MM/yyyy');
+    // console.log('formateed in iOS--', formattedDate);
+    setDateToSend(formattedDate);
+    // callHistoryAPI(formattedDate, selectedValueToSend);
+    filterArrayList(formattedDate, selectedValueToSend);
+  };
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
     const checkInternet = () => {
         NetInfo.fetch().then(state => {
@@ -105,10 +138,10 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
             body: JSON.stringify({
                 supervisorID: number,
                 // , pageNumber: 1, pageSize: 100, 
-                status: selectedValueToSend, date: date
+                status: 0, date: null,
             })
         };
-        console.log('=======requestOptions====== GetSupervisorApprovalHistory ::  ' + requestOptions.body)
+        console.log('GetSupervisorApprovalHistory--request' + requestOptions.body)
         console.log('=======token====== ' + token)
         await fetch(BASE_URL + 'Attendance/GetSupervisorApprovalHistory',
             requestOptions)
@@ -121,15 +154,16 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                 }
             })
             .then((data) => {
-                console.log('==== resp  onseCode==== ' + data.responseCode);
+                // console.log('==== resp  onseCode==== ' + data.responseCode);
                 let json = data;
                 if (json.responseCode == 200) {
-                    console.log('==History Data== ' + JSON.stringify(json.data))
+                    // console.log('==History Data== ' + JSON.stringify(json.data))
                     setDataArray(json.data);
+                    setOriginalArray(json.data);
                 } else {
                     Alert.alert(
                         "Alert!",
-                        dataArray.responseMessage,
+                        json.responseMessage,
                     )
                 }
             })
@@ -139,7 +173,37 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
             .finally(() => {
                 setLoading(false);
             });
+  };
+
+  const filterArrayList = (filteredDate, filteredValue) => {
+    console.log('date in filter--', filteredDate);
+    console.log('selectedVal in filter--', filteredValue);
+    let filterdArrayList = [];
+    if (
+      filteredDate != null &&
+      filteredValue != 'Type'&&
+      filteredValue != 'All') {
+      console.log('Filtering two conditions');
+      filterdArrayList = originalArray.filter(
+        each => each.requestedDate == filteredDate && each.status == filteredValue,
+      );
+    } else if (filteredDate != 'Select Date' && filteredDate != null) {
+      console.log('filtering date');
+      filterdArrayList = originalArray.filter(
+        each => each.requestedDate == filteredDate,
+      );
+    } else if (filteredValue != 'Type' && filteredValue != 'All') {
+      console.log('Filtering selectedValue');
+      filterdArrayList = originalArray.filter(
+        each => each.status == filteredValue,
+      );
+    } else if (filteredValue == 'All' && filteredDate == null) {
+      console.log('Filtering selectedValue with date null');
+      filterdArrayList = originalArray;
     }
+    setDataArray(filterdArrayList);
+    // console.log('final filtered Array', filterdArrayList);
+  };
 
     // This function is to set FlatList UI
     const renderItem = ({ item }) => (
@@ -362,28 +426,31 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                                 options={dataAttendanceType}
                                 defaultValue={selectedValue}
                                 textStyle={EmployeesUploadDocumentsPageStyles.drop_text}
-                                dropdownStyle={EmployeesUploadDocumentsPageStyles.drop_1}
+                                dropdownStyle={[EmployeesUploadDocumentsPageStyles.drop_1, {height: 115}]}
                                 saveScrollPosition={false}
                                 onSelect={
                                     (e) => {
-                                        console.log(e)
-                                        setSelectedValue(e)
+                                        // console.log('selected dropdown val--', e);
+                                        // setSelectedValue(e)
                                         if (e === 0) {
                                             setSelectedValue('All');
-                                            setSelectedValueTosend(0)
-                                            callHistoryAPI(dateToSend, 0);
+                                            setSelectedValueTosend('All');
+                                            // callHistoryAPI(dateToSend, 0);
+                                            filterArrayList(dateToSend, 'All');
                                         } else if (e === 1) {
                                             setSelectedValue('Approved');
-                                            setSelectedValueTosend(1)
-                                            callHistoryAPI(dateToSend, 1);
+                                            setSelectedValueTosend('Approved');
+                                            // callHistoryAPI(dateToSend, 1);
+                                            filterArrayList(dateToSend, 'Approved');
                                         } else if (e === 2) {
                                             setSelectedValue('Rejected');
-                                            setSelectedValueTosend(2)
-                                            callHistoryAPI(dateToSend, 2);
+                                            setSelectedValueTosend('Rejected');
+                                            // callHistoryAPI(dateToSend, 2);
+                                            filterArrayList(dateToSend, 'Rejected');
                                         }
                                     }}
                             />
-                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 200 }}>
+                            <View style={{ position: 'absolute', backgroundColor: '#fff', width: 165 }}>
                                 <Text style={{ fontFamily: 'OpenSans-Regular', marginLeft: 10 }}>
                                     {selectedValue}
                                 </Text>
@@ -416,8 +483,8 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                                 callHistoryAPI(formattedDate_1, selectedValueToSend)
                             }}
                         /> */}
-                        <View style={{}}>
-                            {
+                        <View style={{flex: 1}}>
+                            {/* {
                                 Platform.OS === 'android' ?
                                     <Button backgroundColor={'white'} style={{}} onPress={() => {
                                         setShow(true);
@@ -431,35 +498,62 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                                         setShow(true);
                                     }}>
                                         <Text style={{ color: 'black' }}>
+                                            {dateToShow}
                                         </Text>
                                     </Button>
-                            }
-                            {show && (
+                            } */}
+                            <Button backgroundColor={'white'} style={{}} onPress={() => {
+                                        setShow(true);
+                                    }}>
+                                        <Text style={{ color: 'black' }}>
+                                            {dateToShow}
+                                        </Text>
+                                    </Button>
+                            {/* {show && (
                                 <DateTimePicker
                                     style={{ position: 'absolute' }}
                                     testID="dateTimePicker"
                                     value={date}
                                     mode='date'
+                                    minimumDate={minDate}
                                     maximumDate={maxDate}
                                     onChange={(event, date) => {
                                         const currentDate = date;
+                                        console.log('currentData-', currentDate);
                                         // setDateToUI(currentDate);
                                         setShow(false);
                                         setDate(currentDate);
                                         setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        if (Platform.OS === 'ios') {
-                                            const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                            setDateToSend(formattedDate);
-                                            callHistoryAPI(formattedDate, selectedValueToSend)
-                                        } else {
-                                            var formattedDate_1 = format(currentDate, "dd/MM/yyyy");
-                                            setDateToSend(formattedDate_1);
-                                            callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        }
-                                    }}
+                                        // if (Platform.OS === 'ios') {
+                                        //     // const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
+                                        //     // const formattedDate = moment(date, "YYYY-MM-DD").format('dd/MM/yyyy')
+                                        //     const formattedDate = format(currentDate, 'dd/MM/yyyy')
+                                        //     console.log('formateed in iOS--', formattedDate);
+                                        //     setDateToSend(formattedDate);
+                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
+                                        // } else {
+                                        //     var formattedDate_1 = format(currentDate, "dd/MM/yyyy");
+                                        //     console.log('formated in android --', formattedDate_1);
+                                        //     setDateToSend(formattedDate_1);
+                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
+                                        // }
+                    const formattedDate = format(currentDate, 'dd/MM/yyyy');
+                    console.log('formateed in iOS--', formattedDate);
+                    setDateToSend(formattedDate);
+                    callHistoryAPI(formattedDate, selectedValueToSend);
+                  }}
                                 />
-                            )}
-                        </View>
+                            )} */}
+              <DateTimePickerModal
+                isVisible={show}
+                mode="date"
+                date={date}
+                minimumDate={minDate}
+                maximumDate={maxDate}
+                onConfirm={handleConfirm}
+                onCancel={hideCancelPicker}
+              />
+            </View>
                     </View>
                 </View>
                 <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', }}>

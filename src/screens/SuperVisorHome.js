@@ -271,18 +271,18 @@ const SuperVisorHome = ({ navigation }) => {
                         AsyncStorage.setItem('lastAction', json.data.lastActionCode + '');
                         console.log('--notificationCount--json.data.notificationCount:: ' + json.data.notificationCount)
 
-                        var notificationCount = json.data.notificationCount;
+            var notificationCount = json.data.notificationCount;
 
-                        console.log('==json.data.isUserOnLeave==: ' + json.data.isUserOnLeave);
-                        console.log('==json.data.isUserOnLeave==:1 ' + json.data.isHoliday);
+            console.log('json.data.isUserOnLeave' + json.data.isUserOnLeave);
+            console.log('==json.data.isHoliday' + json.data.isHoliday);
 
-                        setUserOnLeave(json.data.isUserOnLeave);
-                        setHoliday(json.data.isHoliday)
+            setUserOnLeave(json.data.isUserOnLeave);
+            setHoliday(json.data.isHoliday);
 
-                        notificationStore.dispatch({
-                            type: "COUNT_CHANGE",
-                            payload: { count: notificationCount + '' }
-                        });
+            notificationStore.dispatch({
+              type: 'COUNT_CHANGE',
+              payload: {count: notificationCount},
+            });
 
                         var length = json.data.workTypeList.length;
                         if (length > 0) {
@@ -416,8 +416,8 @@ const SuperVisorHome = ({ navigation }) => {
                     AsyncStorage.setItem('lastAction', '');
                     AsyncStorage.setItem('token', '');
                     notificationStore.dispatch({
-                        type: "COUNT_CHANGE",
-                        payload: { count: '0' }
+                        type: 'COUNT_CHANGE',
+                        payload: {count: 0},
                     });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);

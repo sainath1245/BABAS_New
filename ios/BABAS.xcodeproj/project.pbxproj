@@ -27,6 +27,7 @@
 		C2EA04B7D80945EABE087DA9 /* OpenSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EFEE2371E6B74A8B92F7260E /* OpenSans-BoldItalic.ttf */; };
 		C4954052179F4B0A8A3D32FF /* OpenSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BB0D36CEF74C4E7E8EA1CDBC /* OpenSans-ExtraBold.ttf */; };
 		D55D06DA7D9451884322964D /* libPods-BABAS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8FDE188BDF942389E6B23224 /* libPods-BABAS.a */; };
+		E00B10642C1C5AC100146695 /* sound.wav in Resources */ = {isa = PBXBuildFile; fileRef = E00B10632C1C5AC100146695 /* sound.wav */; };
 		E0EFBEEF2BBEBB5F00D965A7 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = E0EFBEEE2BBEBB5900D965A7 /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +69,7 @@
 		A94D04458F6E491EA15C468F /* OpenSans-Semibold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Semibold.ttf"; path = "../src/assets/fonts/OpenSans-Semibold.ttf"; sourceTree = "<group>"; };
 		BB0D36CEF74C4E7E8EA1CDBC /* OpenSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-ExtraBold.ttf"; path = "../src/assets/fonts/OpenSans-ExtraBold.ttf"; sourceTree = "<group>"; };
 		CBDB14ADDFEF482689317B6C /* OpenSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-LightItalic.ttf"; path = "../src/assets/fonts/OpenSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		E00B10632C1C5AC100146695 /* sound.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sound.wav; sourceTree = "<group>"; };
 		E0EFBEEE2BBEBB5900D965A7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ECF1AE4E63A7452897A9E4A3 /* OpenSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "OpenSans-Light.ttf"; path = "../src/assets/fonts/OpenSans-Light.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -159,6 +161,7 @@
 			children = (
 				E0EFBEEE2BBEBB5900D965A7 /* PrivacyInfo.xcprivacy */,
 				5255F357287151920014D214 /* GoogleService-Info.plist */,
+				E00B10632C1C5AC100146695 /* sound.wav */,
 				525A1DBE27C5646300D1CF4B /* QBImagePicker.storyboard */,
 				13B07FAE1A68108700A75B9A /* BABAS */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
@@ -305,6 +308,7 @@
 				C4954052179F4B0A8A3D32FF /* OpenSans-ExtraBold.ttf in Resources */,
 				B6357743D93140748F22851F /* OpenSans-ExtraBoldItalic.ttf in Resources */,
 				876085201E634579B8AF1B64 /* OpenSans-Italic.ttf in Resources */,
+				E00B10642C1C5AC100146695 /* sound.wav in Resources */,
 				68C47359CFC8432798024336 /* OpenSans-Light.ttf in Resources */,
 				B1BEE41E50174D98B8DB5370 /* OpenSans-LightItalic.ttf in Resources */,
 				749092C6074A4EA4A0B196DA /* OpenSans-Medium.ttf in Resources */,
@@ -571,7 +575,7 @@
 				CODE_SIGN_ENTITLEMENTS = BABAS/BABAS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.2;
+				CURRENT_PROJECT_VERSION = 1.1;
 				DEVELOPMENT_TEAM = 83FYVWRX69;
 				ENABLE_BITCODE = NO;
 				EXCLUDED_ARCHS = "";
@@ -582,7 +586,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -608,7 +612,7 @@
 				CODE_SIGN_ENTITLEMENTS = BABAS/BABAS.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.0.2;
+				CURRENT_PROJECT_VERSION = 1.1;
 				DEVELOPMENT_TEAM = 83FYVWRX69;
 				EXCLUDED_ARCHS = "";
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = "";
@@ -618,7 +622,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9;
+				MARKETING_VERSION = 1.10;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"$(inherited)",

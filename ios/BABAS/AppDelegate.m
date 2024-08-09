@@ -53,7 +53,18 @@ static void InitializeFlipper(UIApplication *application) {
   [self.window makeKeyAndVisible];
   return YES;
 }
-
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+  UIApplication.sharedApplication.applicationIconBadgeNumber = 0;
+}
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler
+{
+  if (UIApplication.sharedApplication.applicationIconBadgeNumber) {
+    UIApplication.sharedApplication.applicationIconBadgeNumber = 
+    UIApplication.sharedApplication.applicationIconBadgeNumber + 1;
+  } else {
+    UIApplication.sharedApplication.applicationIconBadgeNumber = 1;
+  }
+}
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
 #if DEBUG

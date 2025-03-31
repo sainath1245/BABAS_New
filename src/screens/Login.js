@@ -23,6 +23,9 @@ import { BASE_URL } from '../utils/consts';
 import { loginPageStyles } from '../utils/styles';
 import { format, parseISO } from "date-fns";
 import moment from 'moment';
+// import axios, {isCancel, AxiosError} from 'axios';
+// import {initializeSslPinning} from 'react-native-ssl-public-key-pinning';
+// import { err } from 'react-native-svg/lib/typescript/xml';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
 
@@ -112,6 +115,7 @@ const Login = ({ navigation }) => {
                 if (!isNaN(email)) {
                     console.log('!isNan ==== :::: ::: ==== Number')
                     callLoginAPI();
+                    // callLoginAPIUsingAxios();
                 } else {
                     console.log('!isNan ==== :::: ::: ==== email')
                     callLoginAPIForNonBabas()
@@ -159,8 +163,152 @@ const Login = ({ navigation }) => {
         }
     }
 
+//   callLoginAPIUsingAxios = async () => {
+//     // if (Platform.OS === 'android' && Platform.Version < 10) {
+//     //     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+//     //         try {
+//     //             SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
+//     //             sslContext.init(null, null, null);
+//     //             SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+//     //             // Use sslSocketFactory in your OkHttpClient or HttpsURLConnection
+//     //         } catch (Exception e) {
+//     //             Log.e("TLS", "Error enabling TLS 1.2", e);
+//     //         }
+//     //     }
+//     // }
+//     await initializeSslPinning({
+//       'mobileapi.babasap.com': {
+//         includeSubdomains: true,
+//         publicKeyHashes: [
+//           'V8tFSq3y2hJDrZmJC114DQjY+nJ1WimBvunYBEiMAIw=',
+//           '47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
+//         ],
+//       },
+//     });
+//     const data = {
+//       userId: 700004,
+//       password: 'Babas@123',
+//       deviceType: '1',
+//       deviceToken: '',
+//       isAdminLogin: 0,
+//     };
+//     axios
+//       .post(
+//         'https://mobileapi-dev.babasap.com/api/Login/UserLogin',
+//         JSON.stringify(data),
+//         {
+//           headers: {'Content-Type': 'application/json'},
+//         },
+//       )
+//       .then(function (response) {
+//         console.log('success login response --', response.data);
+//         let json = response.data;
+//         if (json.responseCode == 200) {
+//           console.log('success responsecode200');
+//           var jwtDecode = require('jwt-decode');
+
+//           var token = json.data;
+//           var decodedPayLoad = jwtDecode(token, {payload: true});
+//           console.log('==decodedPayLoad==' + JSON.stringify(decodedPayLoad));
+
+//           AsyncStorage.setItem('loginUserEmail', email);
+//           AsyncStorage.setItem('token', json.data);
+//           AsyncStorage.setItem('email', email);
+//           console.log('==decodedPayLoad== 1' + JSON.stringify(decodedPayLoad));
+//           insertUser_1(
+//             db,
+//             decodedPayLoad.UserId,
+//             json.data,
+//             decodedPayLoad.FullName,
+//             '',
+//             decodedPayLoad.Email,
+//             decodedPayLoad.UserRole,
+//             decodedPayLoad.Designation,
+//             decodedPayLoad.Location,
+//           );
+//           console.log('==decodedPayLoad== 2' + JSON.stringify(decodedPayLoad));
+//           if (decodedPayLoad.UserRole == 1) {
+//             // Admin Home Scree
+//             navigation.reset({
+//               index: 0,
+//               routes: [
+//                 {
+//                   name: 'AdminHomeDrawer',
+//                   screen: 'AdminDashboard',
+//                 },
+//               ],
+//             });
+//                     } else if (decodedPayLoad.UserRole == 2) {
+//                         console.log('==decodedPayLoad== 3');
+//                         // Supervisor Home Screen
+//                         navigation.reset({
+//                             index: 0,
+//                             routes: [{
+//                                 name: 'SuperVisorHomeDrawer',
+//                                 screen: "SuperVisorHome"
+//                             }],
+//                         });
+//                     } else if (decodedPayLoad.UserRole == 3) {
+//                         // Employee Home Screen
+//                         navigation.reset({
+//                             index: 0,
+//                             routes: [{
+//                                 name: 'EmployeesHomeDrawer',
+//                                 screen: "EmployeesHome"
+//                             }],
+//                         });
+//                     } else {
+//                         Alert.alert(
+//                             "Alert!",
+//                             "Email doesn't exist.",
+//                         )
+//                     }
+//                 } else {
+//                     Alert.alert(
+//                         "Alert!",
+//                         json.responseMessage,
+//                     )
+//                 }
+//       })
+//       .catch(error => {
+//         // console.log('error.config', error.config);
+//         console.log('failure login response', error);
+//         setLoading(false);
+//         Alert.alert('Error!', error.message);
+//         console.log('error.config', error.config);
+//         console.log('error.status', error.status);
+//         console.log('error.statusText', error.statusText);
+//         console.log('error.headers', error.headers);
+//         console.log('error.data', error.data);
+//         console.log('error.response', error.response);
+//         console.log('error.responseCode', error.responseCode);
+//         if (error) {
+//           // The request was made, but the server responded with a status code
+//           // that falls out of the range of 2xx
+//           console.log('login.error.response.data--', error.response.data);
+//           // console.log('login.error.response.status--', error.response.status);
+//         } else {
+//           // Something happened in setting up the request that triggered an Error
+//           console.log('login.error.message', error.message);
+//         }
+//       })
+//       .finally(() => {
+//         setLoading(false);
+//       });
+//   };
     // Thia function is to call Login API
     callLoginAPI = async () => {
+//mobileapi-dev.babasap.com
+        // await initializeSslPinning({
+        //     'mobileapi-dev.babasap.com': {
+        //       includeSubdomains: true,
+        //       publicKeyHashes: [
+        //         'V8tFSq3y2hJDrZmJC114DQjY+nJ1WimBvunYBEiMAIw=',
+        //         // '47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
+        //       ],
+        //     },
+        //   });
+
         var deviceType = '';
         if (Platform.OS === 'ios') {
             deviceType = '2'
@@ -183,9 +331,12 @@ const Login = ({ navigation }) => {
             requestOptions)
             .then(response => {
                 if (response.ok) {
+                    console.log('login success response --',response);
                     return response.json();
                 } else {
                     throw new Error('Something went wrong');
+                    console.log('login error response --',response);
+                    
                 }
             })
             .then((data) => {
@@ -249,7 +400,8 @@ const Login = ({ navigation }) => {
                 }
             })
             .catch((error) => {
-                console.log('==ERROR== : ' + error)
+                // console.log('==ERROR for login== : ' + error)
+                Alert.alert('Error!', error);
             })
             .finally(() => {
                 setLoading(false);

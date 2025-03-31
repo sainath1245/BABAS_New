@@ -263,12 +263,12 @@ const Notifications = ({ navigation }) => {
       });
   };
   const filterArrayList = entity => {
-    // console.log('filtering Pending list with --', entityID);
+    console.log('filtering Pending list with --');
     // console.log('pendingList in filterArrayList--', pendingListArray);
     var individualEntity = pendingListArray.find(
       eachItem => eachItem.requestId == entity.entityID,
     );
-    // console.log('individualEntity--', individualEntity);
+    console.log('individualEntity--', individualEntity);
     if (individualEntity == undefined) {
       Alert.alert('Alert!', approvedOrRejectedMsg);
     } else {

@@ -8,14 +8,15 @@ import {
     Image, StatusBar, Text, TouchableNativeFeedback, TouchableOpacity, View
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DatePicker from 'react-native-datepicker';
+// import DatePicker from 'react-native-datepicker';
 import { TextInput } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { openDatabase } from 'react-native-sqlite-storage';
 import { BASE_URL } from '../utils/consts';
 import { adminDelegateDetails, clockInPageStyles, employeesForgotPasswordPageStyles, employeesSuccessMessagePageStyles, EmployeesUploadDocumentsPageStyles, historyDetailPageStyles, loginPageStyles } from '../utils/styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from 'native-base';
+// import { Button } from 'native-base';
+import { Button } from "react-native-paper";
 import moment from 'moment';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
@@ -215,23 +216,6 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                         source={require('../assets/images/calendar.png')}
                                     />
                                     <View style={{flex: 1}}>
-                                        {/* {
-                                            Platform.OS === 'android' ?
-                                                <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                    setShow(true);
-                                                }}>
-                                                    <Text style={{ color: 'black', alignSelf: 'flex-start' }}>
-                                                        {dobToShow}
-                                                    </Text>
-                                                </Button>
-                                                :
-                                                <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                    setShow(true);
-                                                }}>
-                                                    <Text style={{ color: 'black' }}>
-                                                    </Text>
-                                                </Button>
-                                        } */}
                     <Button
                       backgroundColor={'white'}
                       onPress={() => {
@@ -241,23 +225,6 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                         {dobToShow}
                       </Text>
                     </Button>
-                    {/* {show && (
-                                            <DateTimePicker
-                                                style={{ position: 'absolute' }}
-                                                testID="dateTimePicker"
-                                                value={startDate}
-                                                mode='date'
-                                                minimumDate={minDate}
-                                                onChange={(event, date) => {
-                                                    const currentDate = date;
-                                                    console.log("Start Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                    console.log("Start Date ::: ::: " + currentDate)
-                                                    setShow(false);
-                                                    setDOBToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                                    setStartDate(currentDate);
-                                                }}
-                                            />
-                                        )} */}
                     <DateTimePickerModal
                       isVisible={show}
                       mode="date"
@@ -276,36 +243,7 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                                         style={loginPageStyles.svg_icons}
                                         source={require('../assets/images/calendar.png')}
                                     />
-                                    {/* <DatePicker
-                                        customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                                        date={endDate}
-                                        mode="date"
-                                        placeholder="Select date"
-                                        format="DD/MM/YYYY"
-                                        minDate={startDate}
-                                        confirmBtnText="Confirm"
-                                        cancelBtnText="Cancel"
-                                        showIcon={false}
-                                        onDateChange={(dateStr, date) => { setEndDate(date) }}
-                                    /> */}
                                     <View style={{flex: 1}}>
-                                        {/* {
-                                            Platform.OS === 'android' ?
-                                                <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                    setShow_1(true);
-                                                }}>
-                                                    <Text style={{ color: 'black', alignSelf: 'flex-start' }}>
-                                                        {dobToShow_1}
-                                                    </Text>
-                                                </Button>
-                                                :
-                                                <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                    setShow_1(true);
-                                                }}>
-                                                    <Text style={{ color: 'black' }}>
-                                                    </Text>
-                                                </Button>
-                                        } */}
                     <Button backgroundColor={'white'}
                       onPress={() => {
                         setShow_1(true);
@@ -314,22 +252,6 @@ const AdminDelegateDetails = ({ route, navigation }) => {
                         {dobToShow_1}
                       </Text>
                     </Button>
-                    {/* {show_1 && (
-                                            <DateTimePicker
-                                                style={{ position: 'absolute' }}
-                                                testID="dateTimePicker"
-                                                value={endDate}
-                                                minimumDate={startDate}
-                                                mode='date'
-                                                onChange={(event, date) => {
-                                                    const currentDate = date;
-                                                    console.log("End Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                    setShow_1(false);
-                                                    setDOBToShow_1(moment(currentDate).format("DD/MM/YYYY"))
-                                                    setEndDate(currentDate);
-                                                }}
-                                            />
-                                        )} */}
                     <DateTimePickerModal
                       isVisible={show_1}
                       mode="date"

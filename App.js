@@ -1,8 +1,5 @@
 import 'react-native-gesture-handler';
 import * as React from 'react';
-// import {NavigationContainer} from '@react-navigation/native';
-// import MyStack from './src/utils/navigation';
-// import MyStack1 from './src/utils/navigation';
 import {Provider} from 'react-redux';
 import {
   createAttendanceTypeTabel,
@@ -12,20 +9,18 @@ import {
 import {openDatabase} from 'react-native-sqlite-storage';
 import {useEffect} from 'react';
 import MainNavigation from './src/utils/navigation';
-import {NativeBaseProvider} from 'native-base';
+// import {NativeBaseProvider} from 'native-base';
 import notificationStore from './notification_redux/notificationStore';
 import messaging from '@react-native-firebase/messaging';
 import notifee from '@notifee/react-native';
 import {AppState} from 'react-native';
+// import { GluestackUIProvider } from '@gluestack-ui/themed';
+// import { config } from '@gluestack-ui/config';
+import {Provider as PaperProvider} from 'react-native-paper';
 
 var db = openDatabase({name: 'BABAS_DB.db'});
 
 const App = () => {
-  // const [isBackground, setIsBackground] = useState(false);
-  // const [appPreviousState, setAppPreviousState] = useState();
-  // const [dataArray, setDataArray] = useState([]);
-  // const navigation = useNavigation();
-
   const appState = AppState.currentState;
 
   useEffect(() => {
@@ -69,11 +64,15 @@ const App = () => {
   }, []);
 
   return (
-    <NativeBaseProvider>
+    // <NativeBaseProvider>
+    // <GluestackUIProvider config={config}>
+    <PaperProvider>
       <Provider store={notificationStore}>
         <MainNavigation />
       </Provider>
-    </NativeBaseProvider>
+      {/* </NativeBaseProvider> */}
+      {/* </GluestackUIProvider> */}
+    </PaperProvider>
   );
 };
 

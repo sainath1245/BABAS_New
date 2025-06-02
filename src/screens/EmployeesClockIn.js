@@ -27,7 +27,7 @@ import NetInfo from '@react-native-community/netinfo';
 import Modal from 'react-native-modal';
 import notificationStore from '../../notification_redux/notificationStore';
 import moment from 'moment';
-import { backgroundColor, marginLeft } from 'styled-system';
+// import { backgroundColor, marginLeft } from 'styled-system';
 
 const EmployeesClockIn = ({route, navigation}) => {
   // const [tempData, setTempData] = useState('');
@@ -140,34 +140,6 @@ const EmployeesClockIn = ({route, navigation}) => {
       setToken(item);
       setDateTime(item);
     });
-
-    // const handleAppStateChange = nextAppState => {
-    //   console.log('AppState in ClockIn ---', nextAppState);
-    //   if (nextAppState === 'active') {
-    //     // App has returned from the background
-    //     console.log('App returned to foreground');
-    //     // stopTimer();
-    //     startTimerBasedOnCondition(false);
-    //   } else if (
-    //     appState === 'active' &&
-    //     nextAppState.match(/inactive|background/)
-    //   ) {
-    //     // App has entered the background
-    //     console.log('App returned to background and stopped timer');
-    //     // stopTimer();
-    //     startTimerBasedOnCondition(false);
-    //   }
-    //   setAppState(nextAppState);
-    // };
-    // // Subscribe to app state changes
-    // const subscription = AppState.addEventListener(
-    //   'change',
-    //   handleAppStateChange,
-    // );
-    // return () => {
-    //   // Unsubscribe from app state changes when component unmounts
-    //   subscription.remove();
-    // };
   }, []);
 
   const setDateTime = item => {
@@ -179,25 +151,6 @@ const EmployeesClockIn = ({route, navigation}) => {
         console.log('getting server time in clock IN...', item);
         callApiToGetSrverTime(item);
       } else {
-        // This piece of code is to set Date * Time on UI
-        // var today = new Date();
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setDate(formattedDate);
-
-        // var tempHours = today.getHours();
-        // var hours = today.getHours();
-        // var minutes = today.getMinutes();
-        // var ampm = hours >= 12 ? 'PM' : 'AM';
-        // hours = hours % 12;
-        // hours = hours ? hours : 12; // the hour '0' should be '12'
-        // minutes = minutes < 10 ? '0' + minutes : minutes;
-        // var strTime = hours + ':' + minutes + ' ' + ampm;
-        // setTime(strTime);
-
-        // var formattedDate_1 = format(today, "yyyy-MM-dd " + tempHours + ':' + minutes);
-
-        // console.log('formattedDate_1 ======== ' + formattedDate_1);
-        // setExactDate(formattedDate_1);
         Alert.alert(
           'Alert!',
           'Please check the internet connection to get data.',
@@ -326,9 +279,6 @@ const EmployeesClockIn = ({route, navigation}) => {
             enableResetScrollToCoords={false}>
             <View style={EmployeesUploadDocumentsPageStyles.content_container}>
               <View style={clockInPageStyles.btn_container}>
-                {/* <Text style={{ color: 'black' }}>
-                                    {tempData}
-                                </Text> */}
                 <Text style={clockInPageStyles.text}>Start Latitude</Text>
                 <View style={clockInPageStyles.edit_bg}>
                   <Image
@@ -422,25 +372,6 @@ const EmployeesClockIn = ({route, navigation}) => {
                             'Not able to get Location, please try after sometime.',
                           );
                         }
-                        // } else {
-                        //     Alert.alert(
-                        //         "Alert!",
-                        //         'Your Session expired. Please start Clock In again',
-                        //         [
-                        //             {
-                        //                 text: "Cancel",
-                        //                 onPress: () => console.log("Cancel Pressed"),
-                        //                 style: "cancel"
-                        //             },
-                        //             {
-                        //                 text: "Clock In",
-                        //                 onPress: () => {
-                        //                     navigation.goBack(null);
-                        //                 }
-                        //             }
-                        //         ]
-                        //     )
-                        // }
                       } else {
                         Alert.alert(
                           'Alert!',

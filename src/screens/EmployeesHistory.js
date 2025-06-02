@@ -11,11 +11,12 @@ import { BASE_URL } from '../utils/consts';
 import Modal from "react-native-modal";
 import { Dimensions, StyleSheet } from 'react-native';
 import ModalDropdown from 'react-native-modal-dropdown';
-import DatePicker from 'react-native-datepicker'
+// import DatePicker from 'react-native-datepicker'
 import { format } from "date-fns";
 import moment from 'moment';
 // import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from "native-base";
+// import { Button } from "native-base";
+import { Button } from "react-native-paper";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
@@ -26,7 +27,7 @@ const EmployeesHistory = ({ navigation }) => {
     const [selectedValue, setSelectedValue] = useState('Type');
     const [selectedValueToSend, setSelectedValueTosend] = useState('All');
     const [item_height, setItemHeight] = useState(0);
-    const [dataArray, setDataArray] = useState([])
+    const [dataArray, setDataArray] = useState([]);
     const [userId, setUserId] = useState('');
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
@@ -50,10 +51,6 @@ const EmployeesHistory = ({ navigation }) => {
     }
 
     useEffect(() => {
-        // This piece of code is to set Date on UI
-        // var today = new Date();
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setMaxDate(formattedDate);
 
         setLoading(true)
 
@@ -144,10 +141,6 @@ const EmployeesHistory = ({ navigation }) => {
       .then(data => {
         let json = data;
         if (json.responseCode == 200) {
-          //   console.log(
-          //     '--json.data.attendaceHistories--',
-          //     JSON.stringify(json.data),
-          //   );
           setDataArray(json.data.attendaceHistories);
           setOriginalArray(json.data.attendaceHistories);
         } else {
@@ -461,42 +454,7 @@ const EmployeesHistory = ({ navigation }) => {
                             style={loginPageStyles.svg_icons}
                             source={require('../assets/images/calendar.png')}
                         />
-                        {/* <DatePicker
-                            customStyles={{ fontFamily: 'OpenSans-Regular', dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                            date={date}
-                            mode="date"
-                            placeholder="Select date"
-                            format="DD/MM/YYYY"
-                            maxDate={maxDate}
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            showIcon={false}
-                            onDateChange={(dateStr, date) => {
-                                var date_temp = moment(date).format("DD/MM/YYYY")
-                                setDate(date_temp);
-                                var formattedDate_1 = format(date, "yyyy-MM-dd");
-                                setDateToSend(formattedDate_1);
-                                callHistoryAPI(formattedDate_1, selectedValueToSend)
-                            }}
-                        /> */}
             <View style={{flex: 1}}>
-                            {/* {
-                                Platform.OS === 'android' ?
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black', }}>
-                                            {dateToShow}
-                                        </Text>
-                                    </Button>
-                                    :
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                        </Text>
-                                    </Button>
-                            } */}
               <Button
                 backgroundColor={'white'}
                 onPress={() => {
@@ -504,32 +462,6 @@ const EmployeesHistory = ({ navigation }) => {
                 }}>
                 <Text style={{color:'black'}}>{dateToShow}</Text>
               </Button>
-              {/* {show && (
-                                <DateTimePicker
-                                    style={{ position: 'absolute' }}
-                                    testID="dateTimePicker"
-                                    value={date}
-                                    mode='date'
-                                    minimumDate={minDate}
-                                    maximumDate={maxDate}
-                                    onChange={(event, date) => {
-                                        const currentDate = date;
-                                        // setDateToUI(currentDate);
-                                        setShow(false);
-                                        setDate(currentDate);
-                                        setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        if (Platform.OS === 'ios') {
-                                            const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                            setDateToSend(formattedDate);
-                                            callHistoryAPI(formattedDate, selectedValueToSend)
-                                        } else {
-                                            var formattedDate_1 = format(date, "yyyy-MM-dd");
-                                            setDateToSend(formattedDate_1);
-                                            callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        }
-                                    }}
-                                />
-                            )} */}
               <DateTimePickerModal
                 isVisible={show}
                 mode="date"

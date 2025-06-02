@@ -12,16 +12,17 @@ import {
 import {
     createStackNavigator
 } from '@react-navigation/stack';
-import {
-    View
-} from 'native-base';
+// import {
+//     View
+// } from 'native-base';
 import * as React from 'react';
 import {
     Alert,
     Dimensions,
     Image,
     Text,
-    ActivityIndicator
+    ActivityIndicator,
+    View
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
@@ -74,6 +75,10 @@ import SuperVisorNotificationDetail from "../screens/SuperVisorNotificationDetai
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
 var db = openDatabase({ name: 'BABAS_DB.db' });
+var backgroundColor =
+  BASE_URL === 'https://mobileapi-dev.babasap.com/api/'
+    ? '#06787A99'
+    : '#FA0F0A99';
 
 const CustomDrawerContent = (props) => {
   const dispatch = useDispatch();
@@ -637,7 +642,7 @@ const EmployeesHomeDrawer = () => {
             //https://www.youtube.com/watch?v=l8nY4Alk70Q
             drawerType: 'front',
             drawerStyle: {
-                backgroundColor: '#FA0F0A99',
+                backgroundColor: backgroundColor,
                 width: width * .8,
                 height: height
             },
@@ -821,7 +826,9 @@ const EmployeesHomeDrawer = () => {
                   </Text>
                 </View>
               ) : (
-                <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
+                <View
+                  style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
+                />
               )}
             </TouchableOpacity>
           ),
@@ -831,22 +838,22 @@ const EmployeesHomeDrawer = () => {
   );
 };
 
-// This function is to manage Supervisor Drawer 
+// This function is to manage Supervisor Drawer
 const SuperVisorHomeDrawer = () => {
-    const Drawer = createDrawerNavigator();
-    const navigation = useNavigation();
-    const [notificationCount, setNotificationCount] = React.useState();
+  const Drawer = createDrawerNavigator();
+  const navigation = useNavigation();
+  const [notificationCount, setNotificationCount] = React.useState();
 
   notificationStore.subscribe(() => {
     setNotificationCount(notificationStore.getState().count);
     console.log('--store.getState()-- ' + notificationStore.getState().count);
   });
 
-    return (
-        <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="SuperVisorHome" screenOptions={{
+  return (
+    <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="SuperVisorHome" screenOptions={{
             drawerType: 'front',
             drawerStyle: {
-                backgroundColor: '#FA0F0A99',
+                backgroundColor: backgroundColor,
                 width: width * .8,
                 height: height
             },
@@ -1101,7 +1108,7 @@ const AdminHomeDrawer = () => {
         <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="AdminDashboard" screenOptions={{
             drawerType: 'front',
             drawerStyle: {
-                backgroundColor: '#FA0F0A99',
+                backgroundColor: backgroundColor,
                 width: width * .8,
             },
             drawerLabelStyle: {
@@ -1250,7 +1257,7 @@ const NonBabasHomeDrawer = () => {
         <Drawer.Navigator drawerContent={props => <CustomDrawerContent {...props} />} initialRouteName="AdminDashboard" screenOptions={{
             drawerType: 'front',
             drawerStyle: {
-                backgroundColor: '#FA0F0A99',
+                backgroundColor: backgroundColor,
                 width: width * .8,
             },
             drawerLabelStyle: {

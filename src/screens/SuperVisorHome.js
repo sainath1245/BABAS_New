@@ -53,223 +53,83 @@ const SuperVisorHome = ({ navigation }) => {
     const [isHoliday, setHoliday] = useState();
     const dispatch = useDispatch();
 
-    useEffect(() => {
-        // This function to get userId and userName from local DB
-        db.transaction((tx) => {
-            tx.executeSql(
-                'SELECT * FROM user',
-                [],
-                (tx, results) => {
-                    var temp = [];
-                    for (let i = 0; i < results.rows.length; ++i) {
-                        temp.push(results.rows.item(i));
-                    }
-                    setUserId(temp[0].userId);
-                    setName(temp[0].firstName);
-                    setDesignation(temp[0].desigination);
-                    setLocation(temp[0].location);
-                }
-            );
+  useEffect(() => {
+    // This function to get userId and userName from local DB
+    db.transaction(tx => {
+      tx.executeSql('SELECT * FROM user', [], (_tx, results) => {
+        var temp = [];
+        for (let i = 0; i < results.rows.length; ++i) {
+          temp.push(results.rows.item(i));
+        }
+        console.log('temp details are -', temp);
+
+        setUserId(temp[0].userId);
+        setName(temp[0].firstName);
+        setDesignation(temp[0].desigination);
+        setLocation(temp[0].location);
+        AsyncStorage.getItem('token', (_err, deviceToken) => {
+          AsyncStorage.getItem('FCM_token', (_error, fcmToken) => {
+            setLoading(true);
+            setToken(deviceToken);
+            getWorkType(deviceToken, fcmToken);
+          });
         });
+      });
+    });
 
-        // This function to get clock in/out data from local DB if availabe 
-        db.transaction((tx) => {
-            tx.executeSql(
-                'SELECT * FROM CLOCK_DATA',
-                [],
-                (tx, results) => {
-                    var temp = [];
-                    for (let i = 0; i < results.rows.length; ++i) {
-                        temp.push(results.rows.item(i));
-                        console.log('======results.rows.item(i).id====' + results.rows.item(i).id)
-                    }
-                    console.log('===============temp.length============= ' + temp.length)
-
-                    setOfflineData(temp);
-                    setOfflineDataCount(temp.length);
-
-                    NetInfo.fetch().then(state => {
-                        console.log('no internet === ' + state.isConnected)
-                        console.log('CLOCK REQUEST COUNT === ' + temp.length)
-                        AsyncStorage.getItem('lastAction', (err, item) => {
-                            console.log('Sohel :' + item)
-                            setLastActionCode(parseInt(item))
-                        })
-                        if (state.isConnected) {
-                            if (temp.length > 0) {
-                                Alert.alert(
-                                    "Alert!",
-                                    '(Offline) You have attendance clocking records pending for submission in local device. Please click Ok as below to proceed for submission to server.',
-                                    [
-                                        {
-                                            text: "OK",
-                                            onPress: () => {
-                                                AsyncStorage.getItem('token', (err, item) => {
-                                                    saveAll(temp, item).then(() => {
-                                                        console.log('All data processed')
-                                                    }).catch(err => {
-                                                        console.log('Save All Error')
-                                                    })
-                                                })
-                                            }
-                                        }
-                                    ]
-                                )
-                            } else {
-                                AsyncStorage.getItem('token', (err, deviceToken) => {
-                                    AsyncStorage.getItem('FCM_token', (err, fcmToken) => {
-                                        setLoading(true)
-                                        getWorkType(deviceToken, fcmToken);
-                                    })
-                                })
-                            }
-                        } else {
-                            Alert.alert(
-                                "Alert!",
-                                "(Offline) No internet connection. Clock In/Clock Out feature will not allow user to execute as normal.",
-                            )
-                        }
-                    });
-                }
-            );
-        });
+    
     }, [])
 
-    // This function is to check if data available in local DB
-    async function saveAll(temp, item) {
-        setLoading(true);
-        for (let index = 0; index < temp.length; index++) {
-            console.log('============token======================token=========== ' + item)
-            setToken(item);
-            await saveClockIn(temp[index], item, temp.length, index);
-        }
-    }
-
-    // This function is to save local DB clock in/out data to server 
-    saveClockIn = async (temp, token, length, index) => {
-        var imageData = {
-            uri: temp.image,
-            type: 'image/jpeg', //the mime type of the file
-            name: temp.startDate + temp.startTime + 'image.jpg'
-        }
-
-        const data = new FormData()
-        data.append("userID", temp.userID)
-        data.append("longitude", temp.longitude)
-        data.append("latitude", temp.latitude)
-        data.append("startDate", temp.startDate)
-        data.append("startTime", temp.startTime)
-        data.append("startDateTime", temp.startDateTime)
-        data.append("requestType", temp.requestType)
-        data.append("workType", temp.workType)
-        data.append("shopName", temp.shopName)
-        data.append("location", temp.location)
-        data.append("remark", temp.remark)
-        data.append('image', imageData)
-
-        console.log('===============data============= ' + JSON.stringify(data))
-        console.log('===============data============= ' + token)
-
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token },
-            body: data
-        };
-        console.log('======REQUEST BODY======= ' + JSON.stringify(requestOptions.body));
-        await fetch(BASE_URL + 'Attendance/SaveAttendanceRequest/',
-            requestOptions)
-            .then(response => {
-                console.log('==== resp  onseCode 11 - ==== ' + response.ok);
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong :: ' + response.status);
-                }
-            })
-            .then((data) => {
-                let json = data;
-                console.log('==== resp  onseCode 11 - ==== ' + json.responseCode);
-                if (json.responseCode == 200) {
-                    console.log('resposne ========= ===== ==== ' + JSON.stringify(json.data.requestID))
-                    deleteSingleClockRequest(db, temp.id)
-                    var lastIndex = index + 1;
-                    console.log('----length-----' + length);
-                    console.log('----length----- :: ' + index);
-                    console.log('----length----- :: ' + lastIndex);
-                    if (length == lastIndex) {
-                        Alert.alert(
-                            "Alert!",
-                            "Offline attendance clocking records added to server successfully. You may check your request in History section now.",
-                        )
-                        AsyncStorage.getItem('token', (err, deviceToken) => {
-                            AsyncStorage.getItem('FCM_token', (err, fcmToken) => {
-                                // setLoading(true)
-                                getWorkType(deviceToken, fcmToken);
-                            })
-                        })
-                    }
-                } else {
-                    Alert.alert(
-                        "Alert!",
-                        json.responseMessage,
-                    )
-                }
-            })
-            .catch((error) => {
-                console.log('==ERROR== : ' + error)
-            })
-            .finally(() => {
-                // setLoading(false);
-            });
-    }
 
     // This function is to get Dashboard data and for managin some conditions
-    getWorkType = async (devicdToken, fcmToken) => {
-        var number = parseInt(userId);
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + devicdToken, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID: number, deviceToken: fcmToken })
-        };
-        console.log('=======requestOptions======::getWorkType:: ' + requestOptions.body)
-        console.log('=======token====== ' + token)
-        await fetch(BASE_URL + 'User/GetDashboardData',
-            requestOptions)
-            .then(response => {
-                console.log('====response.ok=====' + response.ok)
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong :: ' + response.status);
-                }
-            })
-            .then((data) => {
-                console.log('===json.data=== ' + JSON.stringify(data))
-                console.log('==== resp  onseCode==== ' + data.responseCode);
-                let json = data;
-                if (json.responseCode == 200) {
-                    if (json.data.isLoggedIn == 1) {
-                        Alert.alert(
-                            "Alert!",
-                            'You disallow to use the same login credentials for >1 device at same time. Kindly re-login if you want to continue using on this device.',
-                            [
-                                {
-                                    text: "Ok",
-                                    onPress: () => {
-                                        AsyncStorage.getItem('token', (err, item) => {
-                                            setLoading(true);
-                                            callLogoutAPI(item);
-                                        })
-                                    }
-                                }
-                            ]
-                        )
-                    } else {
-                        console.log('sainath-----', json.data)
-                        console.log('json.data.lastActionCode ::: ' + json.data.lastActionCode)
-                        setLastActionCode(json.data.lastActionCode)
-                        AsyncStorage.setItem('lastAction', json.data.lastActionCode + '');
-                        console.log('--notificationCount--json.data.notificationCount:: ' + json.data.notificationCount)
+  getWorkType = async (devicdToken, fcmToken) => {
+    var number = parseInt(userId, 10);
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + devicdToken,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({userID: number, deviceToken: fcmToken}),
+    };
+    console.log('RequestOptions' + requestOptions.body);
+    console.log('=======token====== ' + fcmToken);
+    await fetch(BASE_URL + 'User/GetDashboardData', requestOptions)
+      .then(response => {
+        console.log('====response.ok=====' + response.ok);
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong :: ' + response.status);
+        }
+      })
+      .then(data => {
+        console.log('===json.data=== ' + JSON.stringify(data));
+        console.log('==== resp  onseCode==== ' + data.responseCode);
+        let json = data;
+        if (json.responseCode === 200) {
+          if (json.data.isLoggedIn === 1) {
+            Alert.alert(
+              'Alert!',
+              'You disallow to use the same login credentials for >1 device at same time. Kindly re-login if you want to continue using on this device.',
+              [
+                {
+                  text: 'Ok',
+                  onPress: () => {
+                    AsyncStorage.getItem('token', (_err, item) => {
+                      setLoading(true);
+                      callLogoutAPI(item);
+                    });
+                  },
+                },
+              ],
+            );
+          } else {
+            console.log('Json data', json.data);
+            console.log('json.data.lastActionCode' + json.data.lastActionCode);
+            setLastActionCode(json.data.lastActionCode);
+            AsyncStorage.setItem('lastAction', json.data.lastActionCode + '');
+            console.log('notificationCount:: ' + json.data.notificationCount);
 
             var notificationCount = json.data.notificationCount;
 
@@ -284,167 +144,252 @@ const SuperVisorHome = ({ navigation }) => {
               payload: {count: notificationCount},
             });
 
-                        var length = json.data.workTypeList.length;
-                        if (length > 0) {
-                            deleteTableAllAttendanceType(db);
-                        }
-                        for (let i = 0; i < length; i++) {
-                            insertAttendanceType(db, json.data.workTypeList[i].workTypeId, json.data.workTypeList[i].workTypeValue);
-                        }
+            var length = json.data.workTypeList.length;
+            if (length > 0) {
+              deleteTableAllAttendanceType(db);
+            }
+            for (let i = 0; i < length; i++) {
+              insertAttendanceType(
+                db,
+                json.data.workTypeList[i].workTypeId,
+                json.data.workTypeList[i].workTypeValue,
+              );
+            }
 
-                        if (json.data.requestPendingFrom == 45 || json.data.requestPendingFrom == 30 || json.data.requestPendingFrom == 15 || json.data.requestPendingFrom == 1) {
-                            Alert.alert(
-                                "Alert!",
-                                'Kindly be reminded to perform Approve/Reject request before data cleaning cut-off activity start. \nThanks.',
-                                [
-                                    {
-                                        text: "Cancel",
-                                        onPress: () => console.log("Now Now"),
-                                        style: "cancel"
-                                    },
-                                    {
-                                        text: "Ok",
-                                        onPress: () => {
-                                            navigation.navigate("SuperVisorHomeDrawer", {
-                                                ndex: 0,
-                                                screen: "Attendance Approval"
-                                            });
-                                        }
-                                    }
-                                ]
-                            )
-                        } else {
-                            console.log('SOHEL :: requestPendingFrom ::: ::: ' + json.data.requestPendingFrom);
-                        }
+            if (
+              json.data.requestPendingFrom === 45 ||
+              json.data.requestPendingFrom === 30 ||
+              json.data.requestPendingFrom === 15 ||
+              json.data.requestPendingFrom === 1
+            ) {
+              Alert.alert(
+                'Alert!',
+                'Kindly be reminded to perform Approve/Reject request before data cleaning cut-off activity start. \nThanks.',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Now Now'),
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Ok',
+                    onPress: () => {
+                      navigation.navigate('SuperVisorHomeDrawer', {
+                        ndex: 0,
+                        screen: 'Attendance Approval',
+                      });
+                    },
+                  },
+                ],
+              );
+            } else {
+              console.log('requestPendingFrom-' + json.data.requestPendingFrom);
+            }
 
-                        if (json.data.daysLeftForPassword === '15' || json.data.daysLeftForPassword === '7' || json.data.daysLeftForPassword === '1') {
-                            Alert.alert(
-                                "Alert!",
-                                'Your password will expire soon. Please change your password.',
-                                [
-                                    {
-                                        text: "Cancel",
-                                        onPress: () => console.log("Now Now"),
-                                        style: "cancel"
-                                    },
-                                    {
-                                        text: "Change Password",
-                                        onPress: () => {
-                                            navigation.navigate("SuperVisorHomeDrawer", {
-                                                ndex: 0,
-                                                screen: "Change Password"
-                                            });
-                                        }
-                                    }
-                                ]
-                            )
-                        } else if (json.data.daysLeftForPassword === '0') {
-                            Alert.alert(
-                                "Alert!",
-                                'Your password expired. Please change your password.',
-                                [
-                                    {
-                                        text: "Change Password",
-                                        onPress: () => {
-                                            navigation.navigate("SuperVisorHomeDrawer", {
-                                                ndex: 0,
-                                                screen: "Change Password"
-                                            });
-                                        }
-                                    }
-                                ]
-                            )
-                        }
-                    }
-                } else if (json.responseCode == 450) {
-                    Alert.alert(
-                        "Alert!",
-                        json.responseMessage,
-                        [
-                            {
-                                text: "Ok",
-                                onPress: () => {
-                                    AsyncStorage.getItem('token', (err, item) => {
-                                        setLoading(true);
-                                        callLogoutAPI(item);
-                                    })
-                                }
-                            }
-                        ]
-                    )
-                } else {
-                    console.log('Printing this alert...');
-                    Alert.alert(
-                        "Alert!",
-                        json.responseMessage,
-                    )
-                }
-            })
-            .catch((error) => {
-                console.log('==ERROR== : ' + error)
-            })
-            .finally(() => {
-                setLoading(false);
-            });
+            if (
+              json.data.daysLeftForPassword === '15' ||
+              json.data.daysLeftForPassword === '7' ||
+              json.data.daysLeftForPassword === '1'
+            ) {
+              Alert.alert(
+                'Alert!',
+                'Your password will expire soon. Please change your password.',
+                [
+                  {
+                    text: 'Cancel',
+                    onPress: () => console.log('Now '),
+                    style: 'cancel',
+                  },
+                  {
+                    text: 'Change Password',
+                    onPress: () => {
+                      navigation.navigate('SuperVisorHomeDrawer', {
+                        ndex: 0,
+                        screen: 'Change Password',
+                      });
+                    },
+                  },
+                ],
+              );
+            } else if (json.data.daysLeftForPassword === '0') {
+              Alert.alert(
+                'Alert!',
+                'Your password expired. Please change your password.',
+                [
+                  {
+                    text: 'Change Password',
+                    onPress: () => {
+                      navigation.navigate('SuperVisorHomeDrawer', {
+                        ndex: 0,
+                        screen: 'Change Password',
+                      });
+                    },
+                  },
+                ],
+              );
+            }
+          }
+        } else if (json.responseCode === 450) {
+          Alert.alert('Alert!', json.responseMessage, [
+            {
+              text: 'Ok',
+              onPress: () => {
+                AsyncStorage.getItem('token', (_err, item) => {
+                  setLoading(true);
+                  callLogoutAPI(item);
+                });
+              },
+            },
+          ]);
+        } else {
+          console.log('Printing this alert...');
+          Alert.alert('Alert!', json.responseMessage);
+        }
+      })
+      .catch(error => {
+        console.log('==ERROR== : ' + error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  // This function is to get Logout from App
+  callLogoutAPI = async token => {
+    var number = parseInt(userId, 10);
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({userID: number}),
+    };
+    console.log('requestOptions====== ' + requestOptions.body);
+    console.log('=======token====== ' + token);
+    await fetch(BASE_URL + 'User/UserLogout', requestOptions)
+      .then(response => {
+        console.log('====response.ok=====' + response.ok);
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong :: ' + response.status);
+        }
+      })
+      .then(data => {
+        console.log(' response Code==== ' + JSON.stringify(data));
+        let json = data;
+        if (json.responseCode === 200) {
+          console.log('attendaceHistories--' + json.data.attendaceHistories);
+          AsyncStorage.setItem('lastAction', '');
+          AsyncStorage.setItem('token', '');
+          notificationStore.dispatch({
+            type: 'COUNT_CHANGE',
+            payload: {count: 0},
+          });
+          dispatch(clearLogin());
+          deleteTableAllRows(db);
+          deleteTableAllClockRequest(db);
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Login'}],
+          });
+        } else {
+          Alert.alert('Alert!', data.data.status);
+        }
+      })
+      .catch(error => {
+        console.log('==ERROR== : ' + error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  //This method checks the current request type with previously requested type
+  // from server and navigates user to next screen(ClockIn/Out)
+  const checkEmployeeRequestStatus = async reqID => {
+    var number = parseInt(userId, 10);
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({UserId: number, requestType: reqID}),
+    };
+    console.log('REQUEST BODY for requestStatus', requestOptions);
+    await fetch(BASE_URL + 'Attendance/GetParingRequestStatus', requestOptions)
+      .then(response => {
+        console.log('==== resp status ' + response.ok);
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Something went wrong :: ' + response.status);
+        }
+      })
+      .then(data => {
+        let json = data;
+        console.log(' responseCode -- ' + json.responseCode);
+        if (json.responseCode === 200) {
+          const res = JSON.stringify(json.data);
+          console.log('checkEmployeeRequestStatus response' + res);
+          let message = json.data.message;
+          if (message === '' || message === null || message === undefined) {
+            message = 'Something went wrong, please try after sometime.';
+          }
+          if (json.data.isSuccess) {
+            let userStatus = json.data.userStatus;
+            if (userStatus === 0) {
+              navigateUserToSpecificScreen(reqID);
+            } else if (userStatus === 1 || userStatus === 2) {
+              Alert.alert('Alert!', message, [
+                {
+                  text: 'Cancel',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+                {
+                  text: 'Continue',
+                  onPress: () => {
+                    navigateUserToSpecificScreen(reqID);
+                  },
+                },
+              ]);
+            } else {
+              Alert.alert('Alert', message);
+            }
+          } else {
+            Alert.alert('Alert', message);
+          }
+        } else {
+          Alert.alert('Alert!', json.responseMessage);
+        }
+      })
+      .catch(error => {
+        console.log('==ERROR== : ' + error);
+        Alert.alert('Alert!', error.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const navigateUserToSpecificScreen = reqID => {
+    if (reqID === 1) {
+      navigation.navigate('EmployeesClockIn', {
+        branch: location,
+      });
+    } else if (reqID === 2) {
+      navigation.navigate('EmployeesClockOut', {
+        branch: location,
+      });
     }
-
-    // This function is to get Logout from App 
-    callLogoutAPI = async (token) => {
-        var number = parseInt(userId);
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userID: number })
-        };
-        console.log('=======requestOptions====== ' + requestOptions.body)
-        console.log('=======token====== ' + token)
-        await fetch(BASE_URL + 'User/UserLogout',
-            requestOptions)
-            .then(response => {
-                console.log('====response.ok=====' + response.ok)
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong :: ' + response.status);
-                }
-            })
-            .then((data) => {
-                console.log('==== resp  onseCode==== ' + JSON.stringify(data));
-                let json = data;
-                if (json.responseCode == 200) {
-                    console.log('--json.data.attendaceHistories--' + json.data.attendaceHistories)
-                    AsyncStorage.setItem('lastAction', '');
-                    AsyncStorage.setItem('token', '');
-                    notificationStore.dispatch({
-                        type: 'COUNT_CHANGE',
-                        payload: {count: 0},
-                    });
-                    dispatch(clearLogin());
-                    deleteTableAllRows(db);
-                    deleteTableAllClockRequest(db);
-                    navigation.reset({
-                        index: 0,
-                        routes: [{ name: 'Login' }],
-                    });
-                } else {
-                    Alert.alert(
-                        "Alert!",
-                        data.data.status,
-                    )
-                }
-            })
-            .catch((error) => {
-                console.log('==ERROR== : ' + error)
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }
-
-    // This function is to set the UI 
-    return (
-        <View style={loginPageStyles.container_1}>
-            <StatusBar barStyle="default"
+  };
+  // This function is to set the UI
+  return (
+    <View style={loginPageStyles.container_1}>
+      <StatusBar barStyle="default"
                 backgroundColor="#FA0F0A" />
             <ScrollView>
                 <View style={{ flexDirection: 'column' }}>
@@ -504,38 +449,6 @@ const SuperVisorHome = ({ navigation }) => {
                                                     ]
                                                 )
                                             } else {
-                                                // navigation.navigate('EmployeesClockIn')
-                                                // if (isHoliday == 1) {
-                                                //     Alert.alert(
-                                                //         "Alert!",
-                                                //         "Please be inform that today is Public Holiday/Weekend. You may perform Clock In/Out request if require to work on these day.",
-                                                //         [
-                                                //             {
-                                                //                 text: "Cancel",
-                                                //                 style: "cancel"
-                                                //             },
-                                                //             {
-                                                //                 text: "Clock In",
-                                                //                 onPress: () => {
-                                                //                     if (isUserOnLeave == 1) {
-                                                //                         Alert.alert(
-                                                //                             "Alert!",
-                                                //                             "Please note that you applied leave for these day. You are not require to perform Clock In/Out request. Kindly be inform.",
-                                                //                         )
-                                                //                     } else if (lastActionCode == 2 || lastActionCode == 0) {
-                                                //                         navigation.navigate('EmployeesClockIn')
-                                                //                     } else {
-                                                //                         Alert.alert(
-                                                //                             "Alert!",
-                                                //                             "Your last request was for Clock-In. You disallow to submit the same.",
-                                                //                         )
-                                                //                     }
-
-                                                //                 }
-                                                //             }
-                                                //         ]
-                                                //     )
-                                                // } else 
                                                 if (isUserOnLeave == 1) {
                                                     Alert.alert(
                                                         "Alert!",
@@ -543,25 +456,17 @@ const SuperVisorHome = ({ navigation }) => {
                                                     )
                                                 } else {
                                                     if (state.isConnected) {
-                                                            navigation.navigate('EmployeesClockIn', {
-                                                            branch: location,
-                                                    })
+                                                    //         navigation.navigate('EmployeesClockIn', {
+                                                    //         branch: location,
+                                                    // })
+                                                    checkEmployeeRequestStatus(1);
                                                 } else {
                                                     Alert.alert(
                                                         "Alert!",
                                                         "The Clock In functionality is only available while connected to the internet.",
                                                     )
                                                 }
-                                                    // navigation.navigate('EmployeesClockIn')
                                                 }
-                                                // else if (lastActionCode == 2 || lastActionCode == 0) {
-                                                //     navigation.navigate('EmployeesClockIn')
-                                                // } else {
-                                                //     Alert.alert(
-                                                //         "Alert!",
-                                                //         "Your last request was for Clock-In. You disallow to submit the same.",
-                                                //     )
-                                                // }
                                             }
                                         })
                                     }}
@@ -595,37 +500,6 @@ const SuperVisorHome = ({ navigation }) => {
                                                     ]
                                                 )
                                             } else {
-                                                // if (isHoliday == 1) {
-                                                //     Alert.alert(
-                                                //         "Alert!",
-                                                //         "Please be inform that today is Public Holiday/Weekend. You may perform Clock In/Out request if require to work on these day.",
-                                                //         [
-                                                //             {
-                                                //                 text: "Cancel",
-                                                //                 style: "cancel"
-                                                //             },
-                                                //             {
-                                                //                 text: "Clock Out",
-                                                //                 onPress: () => {
-                                                //                     if (isUserOnLeave == 1) {
-                                                //                         Alert.alert(
-                                                //                             "Alert!",
-                                                //                             "Please note that you applied leave for these day. You are not require to perform Clock In/Out request. Kindly be inform.",
-                                                //                         )
-                                                //                     } else if (lastActionCode == 1) {
-                                                //                         navigation.navigate('EmployeesClockOut')
-                                                //                     } else {
-                                                //                         Alert.alert(
-                                                //                             "Alert!",
-                                                //                             "Your last request was for Clock-Out. You disallow to submit the same.",
-                                                //                         )
-                                                //                     }
-
-                                                //                 }
-                                                //             }
-                                                //         ]
-                                                //     )
-                                                // } else 
                                                 if (isUserOnLeave == 1) {
                                                     Alert.alert(
                                                         "Alert!",
@@ -633,25 +507,17 @@ const SuperVisorHome = ({ navigation }) => {
                                                     )
                                                 } else {
                                                     if (state.isConnected) {
-                                                    navigation.navigate('EmployeesClockOut', {
-                                                        branch: location,
-                                                    })
+                                                    // navigation.navigate('EmployeesClockOut', {
+                                                    //     branch: location,
+                                                    // })
+                                                    checkEmployeeRequestStatus(2);
                                                 } else {
                                                     Alert.alert(
                                                         "Alert!",
                                                         "The Clock Out functionality is only available while connected to the internet.",
                                                     )
                                                 }
-                                                    // navigation.navigate('EmployeesClockOut')
                                                 }
-                                                // else if (lastActionCode == 1) {
-                                                //     navigation.navigate('EmployeesClockOut')
-                                                // } else {
-                                                //     Alert.alert(
-                                                //         "Alert!",
-                                                //         "Your last request was for Clock-Out. You disallow to submit the same.",
-                                                //     )
-                                                // }
                                             }
                                         })
                                     }}

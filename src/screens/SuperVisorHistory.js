@@ -8,6 +8,7 @@ import React, {
 import {
     ActivityIndicator,
     Alert,
+    // Button,
     Dimensions,
     FlatList,
     Image,
@@ -31,7 +32,8 @@ import {
     loginPageStyles
 } from '../utils/styles';
 // import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from "native-base";
+// import { Button } from "native-base";
+import { Button } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
@@ -484,35 +486,6 @@ const SuperVisorHistory = ({ navigation }) => {
                 }}>
                 <Text style={{color: 'black'}}>{dateToShow}</Text>
               </Button>
-                            {/* {show && (
-                                <DateTimePicker
-                                    style={{ position: 'absolute' }}
-                                    testID="dateTimePicker"
-                                    value={date}
-                                    mode='date'
-                                    minimumDate={minDate}
-                                    maximumDate={maxDate}
-                                    onChange={(event, date) => {
-                                        const currentDate = date;
-                                        // setDateToUI(currentDate);
-                                        setShow(false);
-                                        setDate(currentDate);
-                                        setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        // if (Platform.OS === 'ios') {
-                                        //     const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                        //     setDateToSend(formattedDate);
-                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
-                                        // } else {
-                                        //     var formattedDate_1 = format(currentDate, "yyyy-MM-dd");
-                                        //     setDateToSend(formattedDate_1);
-                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        // }
-                                        var formattedDate = format(currentDate, "yyyy-MM-dd");
-                                        setDateToSend(formattedDate);
-                                        callHistoryAPI(formattedDate, selectedValueToSend)
-                                    }}
-                                />
-                            )} */}
               <DateTimePickerModal
                 isVisible={show}
                 mode="date"

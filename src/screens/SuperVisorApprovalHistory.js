@@ -13,7 +13,8 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import { BASE_URL } from '../utils/consts';
 import { adminSuperVisorMapping, clockInPageStyles, EmployeesUploadDocumentsPageStyles, historyPageStyles, loginPageStyles } from '../utils/styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from "native-base";
+// import { Button } from "native-base";
+import { Button } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 
 var db = openDatabase({ name: 'BABAS_DB.db' });
@@ -48,10 +49,6 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
     }
 
     useEffect(() => {
-        // This piece of code is to set Date on UI
-        // var today = new Date();
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setMaxDate(formattedDate);
         setLoading(true)
 
         // This functio to get userId from local DB
@@ -91,19 +88,6 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
     setShow(false);
     setDate(currentDate);
     setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
-    // if (Platform.OS === 'ios') {
-    //     // const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-    //     // const formattedDate = moment(date, "YYYY-MM-DD").format('dd/MM/yyyy')
-                                        //     const formattedDate = format(currentDate, 'dd/MM/yyyy')
-                                        //     console.log('formateed in iOS--', formattedDate);
-                                        //     setDateToSend(formattedDate);
-                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
-                                        // } else {
-                                        //     var formattedDate_1 = format(currentDate, "dd/MM/yyyy");
-                                        //     console.log('formated in android --', formattedDate_1);
-                                        //     setDateToSend(formattedDate_1);
-                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        // }
     const formattedDate = format(currentDate, 'dd/MM/yyyy');
     // console.log('formateed in iOS--', formattedDate);
     setDateToSend(formattedDate);
@@ -465,43 +449,7 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                             style={loginPageStyles.svg_icons}
                             source={require('../assets/images/calendar.png')}
                         />
-                        {/* <DatePicker
-                            customStyles={{ dateInput: { borderWidth: 0, marginLeft: -40 } }}
-                            date={date}
-                            mode="date"
-                            placeholder="Select date"
-                            format="DD/MM/YYYY"
-                            maxDate={maxDate}
-                            confirmBtnText="Confirm"
-                            cancelBtnText="Cancel"
-                            showIcon={false}
-                            onDateChange={(dateStr, date) => {
-                                var date_temp = moment(date).format("DD/MM/YYYY")
-                                setDate(date_temp);
-                                var formattedDate_1 = format(date, "dd/MM/yyyy");
-                                setDateToSend(formattedDate_1);
-                                callHistoryAPI(formattedDate_1, selectedValueToSend)
-                            }}
-                        /> */}
                         <View style={{flex: 1}}>
-                            {/* {
-                                Platform.OS === 'android' ?
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                            {dateToShow}
-                                        </Text>
-                                    </Button>
-                                    :
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                            {dateToShow}
-                                        </Text>
-                                    </Button>
-                            } */}
                             <Button backgroundColor={'white'} style={{}} onPress={() => {
                                         setShow(true);
                                     }}>
@@ -509,41 +457,6 @@ const SuperVisorApprovalHistory = ({ navigation }) => {
                                             {dateToShow}
                                         </Text>
                                     </Button>
-                            {/* {show && (
-                                <DateTimePicker
-                                    style={{ position: 'absolute' }}
-                                    testID="dateTimePicker"
-                                    value={date}
-                                    mode='date'
-                                    minimumDate={minDate}
-                                    maximumDate={maxDate}
-                                    onChange={(event, date) => {
-                                        const currentDate = date;
-                                        console.log('currentData-', currentDate);
-                                        // setDateToUI(currentDate);
-                                        setShow(false);
-                                        setDate(currentDate);
-                                        setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        // if (Platform.OS === 'ios') {
-                                        //     // const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                        //     // const formattedDate = moment(date, "YYYY-MM-DD").format('dd/MM/yyyy')
-                                        //     const formattedDate = format(currentDate, 'dd/MM/yyyy')
-                                        //     console.log('formateed in iOS--', formattedDate);
-                                        //     setDateToSend(formattedDate);
-                                        //     callHistoryAPI(formattedDate, selectedValueToSend)
-                                        // } else {
-                                        //     var formattedDate_1 = format(currentDate, "dd/MM/yyyy");
-                                        //     console.log('formated in android --', formattedDate_1);
-                                        //     setDateToSend(formattedDate_1);
-                                        //     callHistoryAPI(formattedDate_1, selectedValueToSend)
-                                        // }
-                    const formattedDate = format(currentDate, 'dd/MM/yyyy');
-                    console.log('formateed in iOS--', formattedDate);
-                    setDateToSend(formattedDate);
-                    callHistoryAPI(formattedDate, selectedValueToSend);
-                  }}
-                                />
-                            )} */}
               <DateTimePickerModal
                 isVisible={show}
                 mode="date"

@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import DateTimePicker from '@react-native-community/datetimepicker';
 import NetInfo from "@react-native-community/netinfo";
 import { format } from "date-fns";
 import moment from 'moment';
@@ -29,7 +28,8 @@ import {
     historyPageStyles,
     loginPageStyles
 } from '../utils/styles';
-import { Button } from 'native-base';
+// import { Button } from 'native-base';
+import { Button } from "react-native-paper";
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 var width = Dimensions.get('window').width;
@@ -303,23 +303,7 @@ const AdminActivityLog = ({ navigation }) => {
                             source={require('../assets/images/calendar.png')}
                         />
                         <View style={{flex: 1}}>
-                            {/* {
-                                Platform.OS === 'android' ?
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black', }}>
-                                            {dateToShow}
-                                        </Text>
-                                    </Button>
-                                    :
-                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                        setShow(true);
-                                    }}>
-                                        <Text style={{ color: 'black' }}>
-                                        </Text>
-                                    </Button>
-                            } */}
+                            
               <Button
                 backgroundColor={'white'}
                 onPress={() => {
@@ -327,31 +311,6 @@ const AdminActivityLog = ({ navigation }) => {
                 }}>
                 <Text style={{color: 'black'}}>{dateToShow}</Text>
               </Button>
-              {/* {show && (
-                                <DateTimePicker
-                                    style={{ position: 'absolute' }}
-                                    testID="dateTimePicker"
-                                    value={date}
-                                    mode='date'
-                                    maximumDate={maxDate}
-                                    onChange={(event, date) => {
-                                        const currentDate = date;
-                                        // setDateToUI(currentDate);
-                                        setShow(false);
-                                        setDate(currentDate);
-                                        setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-                                        if (Platform.OS === 'ios') {
-                                            const formattedDate = moment(date, "YYYY-MM-DD").format("yyyy-MM-DD");
-                                            setDateToSend(formattedDate);
-                                            getActivityLog(formattedDate, selectedValueToSend)
-                                        } else {
-                                            var formattedDate_1 = format(currentDate, "yyyy-MM-dd");
-                                            setDateToSend(formattedDate_1);
-                                            getActivityLog(formattedDate_1, selectedValueToSend)
-                                        }
-                                    }}
-                                />
-                            )} */}
               <DateTimePickerModal
                 isVisible={show}
                 mode="date"

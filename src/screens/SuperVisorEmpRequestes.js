@@ -40,7 +40,8 @@ import {
     superVisorEmployeeRequestStyles
 } from '../utils/styles';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from "native-base";
+// import { Button } from "native-base";
+import { Button } from "react-native-paper";
 import moment from 'moment';
 import { useFocusEffect, useNavigationState } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -128,14 +129,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
             checkInternet();
         }, 1000);
 
-        // This piece of code is to set Date * Time on UI
-        // var today = new Date();
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setMaxDate(formattedDate);
-
-        // today.setMonth(today.getMonth() - 2);
-        // var formattedDate = format(today, "dd/MM/yyyy");
-        // setMinDate(new Date(formattedDate));
     let date = moment().subtract(90, 'days').toDate();
     setMinDate(date);
     }, [isFocused])
@@ -355,12 +348,12 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
 
   // This function is to get all the clock in/out requestes
     getRequestForApproval = async () => {
-        console.log('startDate ::: ::: ' + startDate);
-        console.log('endDate ::: ::: ' + endDate);
-        console.log('name ::: ::: ' + name);
-        console.log('empID ::: ::: ' + empID);
-        console.log('selectedValueToSend ::: ::: ' + selectedValueToSend);
-        console.log('selectedValue ::: ::: ' + selectedValue);
+        // console.log('startDate ::: ::: ' + startDate);
+        // console.log('endDate ::: ::: ' + endDate);
+        // console.log('name ::: ::: ' + name);
+        // console.log('empID ::: ::: ' + empID);
+        // console.log('selectedValueToSend ::: ::: ' + selectedValueToSend);
+        // console.log('selectedValue ::: ::: ' + selectedValue);
 
         var newStartDate = '';
         var newEndDate = '';
@@ -575,11 +568,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                     style={EmployeesUploadDocumentsPageStyles.top_image}
                     source={require('../assets/images/top_image_1.png')}
                 />
-                {/* <View style={adminSuperVisorMapping.top_image_layer_1}>
-                    <Text style={{ fontFamily: 'OpenSans-Semibold', color: 'white', fontSize: 18 }}>
-                        Total Requestes: {dataArray.length}
-                    </Text>
-                </View> */}
                 <View style={clockInPageStyles.top_image_layer} />
                 <TouchableOpacity
                     style={{ marginTop: 40, paddingTop: 30, position: 'absolute', alignSelf: 'flex-end', paddingRight: 0 }}
@@ -716,24 +704,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                             source={require('../assets/images/calendar.png')}
                                         />
                                         <View style={{flex: 1}}>
-                                            {/* {
-                                                Platform.OS === 'android' ?
-                                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                        setShow(true);
-                                                    }}>
-                                                        <Text style={{ color: 'black', alignSelf: 'flex-start' }}>
-                                                            {dateToShow}
-                                                        </Text>
-                                                    </Button>
-                                                    :
-                                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                        setShow(true);
-                                                    }}>
-                                                        <Text style={{ color: 'black' }}>
-                                                        {dateToShow}
-                                                        </Text>
-                                                    </Button>
-                                            } */}
                                             <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                         setShow(true);
                                                     }}>
@@ -741,32 +711,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                         {dateToShow}
                                                         </Text>
                                                     </Button>
-                                            {/* {show && (
-                                                <DateTimePicker
-                                                    style={{ position: 'absolute', width: 200, alignSelf: 'flex-start' }}
-                                                    testID="dateTimePicker"
-                                                    value={startDate_1}
-                                                    // minimumDate={minDate}
-                                                    maximumDate={maxDate}
-                                                    mode='date'
-                                                    onChange={(event, date) => {
-                                                        const currentDate = date;
-                                                        console.log("Start Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                        // setShow(false);
-                                                        // {
-                                                            Platform.OS === 'android' ? 
-                                                            setShow(false) : null
-                                                        // }
-                                                        setDateToShow(moment(currentDate).format("DD/MM/YYYY"))
-
-                                                        setStartDate_1(currentDate)
-                                                        setEndDate_1(currentDate)
-
-                                                        setStartDate(currentDate)
-                                                        setEndDate(currentDate)
-                                                    }}
-                                                />
-                                            )} */}
                                             <DateTimePickerModal 
                                                 style={{position: 'absolute', width: 200, alignSelf: 'flex-start'}}
                                                 value={startDate_1}
@@ -789,23 +733,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                         />
                                         {/* <View style={{}}> */}
                                         <View style={{flex: 1}}>
-                                            {/* {
-                                                Platform.OS === 'android' ?
-                                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                        setShow_1(true);
-                                                    }}>
-                                                        <Text style={{ color: 'black', alignSelf: 'flex-start' }}>
-                                                            {dateToShow_1}
-                                                        </Text>
-                                                    </Button>
-                                                    :
-                                                    <Button backgroundColor={'white'} style={{}} onPress={() => {
-                                                        setShow_1(true);
-                                                    }}>
-                                                        <Text style={{ color: 'black' }}>
-                                                        </Text>
-                                                    </Button>
-                                            } */}
                                             <Button backgroundColor={'white'} style={{}} onPress={() => {
                                                         setShow_1(true);
                                                     }}>
@@ -813,27 +740,6 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                                             {dateToShow_1}
                                                         </Text>
                                                     </Button>
-                                            {/* {show_1 && (
-                                                <DateTimePicker
-                                                    style={{ position: 'absolute', width: 200, alignSelf: 'flex-start' }}
-                                                    testID="dateTimePicker"
-                                                    value={endDate_1}
-                                                    minimumDate={startDate_1}
-                                                    maximumDate={maxDate}
-                                                    mode='date'
-                                                    onChange={(event, date) => {
-                                                        const currentDate = date;
-                                                        console.log("End Date ::: ::: " + (moment(currentDate).format("DD/MM/YYYY")))
-                                                        // setShow_1(false);
-                                                        Platform.OS === 'android' ? 
-                                                        setShow(false) : null
-                                                        setDateToShow_1(moment(currentDate).format("DD/MM/YYYY"))
-
-                                                        setEndDate_1(currentDate)
-                                                        setEndDate(currentDate)
-                                                    }}
-                                                />
-                                            )} */}
                                             <DateTimePickerModal
                 isVisible={show_1}
                 mode="date"
@@ -907,12 +813,12 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                                     </TouchableOpacity>
                                     <TouchableOpacity
                                         onPress={() => {
-                                            console.log('startDate ::: ::: ' + startDate);
-                                            console.log('endDate ::: ::: ' + endDate);
-                                            console.log('name ::: ::: ' + name);
-                                            console.log('empID ::: ::: ' + empID);
-                                            console.log('selectedValueToSend ::: ::: ' + selectedValueToSend);
-                                            console.log('selectedValue ::: ::: ' + selectedValue);
+                                            // console.log('startDate ::: ::: ' + startDate);
+                                            // console.log('endDate ::: ::: ' + endDate);
+                                            // console.log('name ::: ::: ' + name);
+                                            // console.log('empID ::: ::: ' + empID);
+                                            // console.log('selectedValueToSend ::: ::: ' + selectedValueToSend);
+                                            // console.log('selectedValue ::: ::: ' + selectedValue);
 
                                             if (startDate === '' && endDate === '' && name === '' && empID === '' && selectedValueToSend === 0) {
                                                 Alert.alert(

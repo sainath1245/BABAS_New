@@ -14,7 +14,7 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import { deleteTableAllAttendanceType, insertAttendanceType, deleteTableAllRows, deleteTableAllClockRequest } from '../../database/local_database';
 import { Dimensions, StyleSheet } from 'react-native';
 import Modal from "react-native-modal";
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+// import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ScrollView } from 'react-native-gesture-handler';
 import messaging from '@react-native-firebase/messaging';
 import { useDispatch } from 'react-redux';

@@ -82,7 +82,7 @@ const SuperVisorHome = ({ navigation }) => {
 
 
     // This function is to get Dashboard data and for managin some conditions
-  getWorkType = async (devicdToken, fcmToken) => {
+  const getWorkType = async (devicdToken, fcmToken) => {
     var number = parseInt(userId, 10);
     const requestOptions = {
       method: 'POST',
@@ -255,7 +255,7 @@ const SuperVisorHome = ({ navigation }) => {
   };
 
   // This function is to get Logout from App
-  callLogoutAPI = async token => {
+  const callLogoutAPI = async token => {
     var number = parseInt(userId, 10);
     const requestOptions = {
       method: 'POST',

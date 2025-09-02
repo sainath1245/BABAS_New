@@ -112,7 +112,7 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to get Dashboard data from server
-    getDashboardData = async (fcmToken) => {
+    const getDashboardData = async (fcmToken) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -152,7 +152,7 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to get Attendance type & other conditions related data
-    getWorkType = async (fcmToken) => {
+    const getWorkType = async (fcmToken) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -272,7 +272,7 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to call logout API to clear the login session
-    callLogoutAPI = async (token) => {
+    const callLogoutAPI = async (token) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -330,7 +330,7 @@ const AdminDashboard = ({ navigation }) => {
             <StatusBar barStyle="default"
                 backgroundColor="#FA0F0A" />
             <ScrollView>
-                <View style={{ flexDirection: 'column' }}>
+                <View style={{ flexDirection: 'column' , minHeight: 700}}>
                     <Image
                         style={loginPageStyles.top_image}
                         source={require('../assets/images/top_image.png')}

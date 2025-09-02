@@ -263,10 +263,12 @@ const SuperVisorNotificationDetail = ({route, navigation, onDataReceived}) => {
                   </Text>
                 </View>
               </View>
+              {typeof props.imagePath === 'string' && props.imagePath.trim().length > 0 ? (
               <Image
                 style={superVisorEmployeeRequestStyles.image}
                 source={{uri: props.imagePath}}
               />
+              ) : null}
               <View style={superVisorEmployeeRequestStyles.item_views_top}>
                 <View style={superVisorEmployeeRequestStyles.image_bg}>
                   <Image

@@ -159,10 +159,12 @@ const EmployeesHistoryDetail = ({ route, navigation }) => {
                     <KeyboardAwareScrollView style={{ marginBottom: 150 }} enableOnAndroid={true}>
                         <View style={loginPageStyles.content_container}>
                             <View style={historyDetailPageStyles.btn_container}>
+                                { typeof imageURL === 'string' && imageURL.trim().length > 0 ? (
                                 <Image
                                     style={historyDetailPageStyles.top_image}
                                     source={{ uri: imageURL }}
                                 />
+                                ) : null }
                                 <Text style={historyDetailPageStyles.remark_text_hint}>
                                     Remarks
                                 </Text>

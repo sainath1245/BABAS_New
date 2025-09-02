@@ -134,7 +134,7 @@ const SuperVisorHistory = ({ navigation }) => {
     filterArrayList(formattedDate, selectedValueToSend);
   };
   // This function is to get Clock in/out Hisotry data from server
-    callHistoryAPI = async (date, selectedValueToSend) => {
+    const callHistoryAPI = async (date, selectedValueToSend) => {
     var number = parseInt(userId);
     const requestOptions = {
       method: 'POST',

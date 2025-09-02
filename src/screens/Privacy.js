@@ -22,12 +22,12 @@ const Privacy = ({ navigation }) => {
                 backgroundColor="#FA0F0A" />
             <View style={{}}>
                 <WebView
-                    onLoad={() => { setLoading(false) }}
+                    onLoadEnd={() => { setLoading(false) }}
                     source={{
                         uri: 'https://babas.com.my/index.php/babas_attendance_clocking_privacy_policy',
                     }}
                     javaScriptEnabled={false}
-                    style={{ flex: 1, width: width * 1, marginTop: -100, marginBottom: 10 }}
+                    style={{ flex: 1, width: width * 1, marginTop: -100, marginBottom: 10, height: 200 }}
                 />
                 <TouchableOpacity
                     onPress={() => {

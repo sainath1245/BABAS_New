@@ -11,7 +11,7 @@ import { BASE_URL } from '../utils/consts';
 import Modal from "react-native-modal";
 
 const AdminSupervisorMapping = ({ navigation }) => {
-    const [token, setToken] = useState('');
+    // const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [isConnected, setConnected] = useState();
     const [dataArray, setDataArray] = useState([])
@@ -19,24 +19,25 @@ const AdminSupervisorMapping = ({ navigation }) => {
 
     useEffect(() => {
         // This function is to get token to call the APIs
-        AsyncStorage.getItem('token', (err, item) => {
-            setToken(item);
+        AsyncStorage.getItem('token', (err, token) => {
+            // setToken(item);
+            setLoading(true);
+            checkInternet(token);
         })
-        setLoading(true)
-        setTimeout(() => {
-            checkInternet();
-        }, 1000);
+        // setLoading(true)
+        // setTimeout(() => {
+        //     checkInternet();
+        // }, 2000);
     }, [])
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
-    const checkInternet = () => {
+    const checkInternet = (token) => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
-                getSuperVisors();
+                getSuperVisors(token);
             } else {
                 setLoading(false);
-                console.log('-=-=-=-=-=-=-=-=-')
                 Alert.alert(
                     "Alert!",
                     "(Offline) No internet connection. Please try again later.",
@@ -48,7 +49,7 @@ const AdminSupervisorMapping = ({ navigation }) => {
     }
 
     // This function is to get All supervisors from server
-    getSuperVisors = async () => {
+    const getSuperVisors = async (token) => {
         const requestOptions = {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
@@ -63,7 +64,7 @@ const AdminSupervisorMapping = ({ navigation }) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status ' + response.status);
                 }
             })
             .then((data) => {
@@ -75,12 +76,16 @@ const AdminSupervisorMapping = ({ navigation }) => {
                 } else {
                     Alert.alert(
                         "Alert!",
-                        dataArray.responseMessage,
+                        data.responseMessage,
                     )
                 }
             })
             .catch((error) => {
-                console.log('==ERROR== : ' + error)
+                // console.log('==ERROR== : ' + error)
+                Alert.alert(
+                        "Alert!",
+                        error.message,
+                    )
             })
             .finally(() => {
                 setLoading(false);
@@ -116,7 +121,9 @@ const AdminSupervisorMapping = ({ navigation }) => {
                             onPress={() => {
                                 navigation.navigate('AdminSelectNewApprover', {
                                     supervisorID: item.supervisorID,
-                                    dataArray: dataArray
+                                    supervisorList: dataArray,
+                                    isEmployeeDelegation: false,
+                                    employeeID: 0
                                 })
                             }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', width: 80, justifyContent: 'center', backgroundColor: '#E63627', height: 120 }}>

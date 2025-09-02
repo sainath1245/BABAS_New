@@ -56,7 +56,7 @@ const NonBabasDashboard = ({ navigation }) => {
                     {
                         Platform.OS == 'ios' ?
                             <WebView
-                                onLoad={() => { setLoading(false) }}
+                                onLoadEnd={() => { setLoading(false) }}
                                 source={{
                                     uri: 'https://docs.google.com/document/d/1cWwsLoSUDtJbPncW3tLInMfq5cg6HsCqVP8T71d0Zeo/edit?usp=sharing',
                                 }}
@@ -68,16 +68,16 @@ const NonBabasDashboard = ({ navigation }) => {
                                     return true
                                 }}
                                 javaScriptEnabled={false}
-                                style={{ flex: 1, width: width * 1, marginTop: -90 }}
+                                style={{ flex: 1, width: width * 1, marginTop: -90, height: 200 }}
                             />
                             :
                             <WebView
-                                onLoad={() => { setLoading(false) }}
+                                onLoadEnd={() => { setLoading(false) }}
                                 source={{
                                     uri: 'https://docs.google.com/document/d/1cWwsLoSUDtJbPncW3tLInMfq5cg6HsCqVP8T71d0Zeo/edit?usp=sharing',
                                 }}
                                 javaScriptEnabled={true}
-                                style={{ flex: 1, width: width * 1, marginTop: -90 }}
+                                style={{ flex: 1, width: width * 1, marginTop: -90, height: 200 }}
                             />
                     }
 

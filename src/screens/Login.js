@@ -334,9 +334,8 @@ const Login = ({ navigation }) => {
                     console.log('login success response --',response);
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong');
                     console.log('login error response --',response);
-                    
+                    throw new Error('Something went wrong');
                 }
             })
             .then((data) => {
@@ -458,7 +457,7 @@ const Login = ({ navigation }) => {
 
     // This function is to set the UI
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        // <SafeAreaView style={{ flex: 1 }}>
             <View style={loginPageStyles.container}>
                 <StatusBar barStyle="default"
                     backgroundColor="#FA0F0A" />
@@ -597,7 +596,7 @@ const Login = ({ navigation }) => {
                     </View>
                 </KeyboardAwareScrollView>
             </View>
-        </SafeAreaView>
+        // </SafeAreaView>
     );
 };
 export default Login;

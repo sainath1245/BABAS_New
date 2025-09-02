@@ -458,10 +458,12 @@ const SuperVisorEmpRequestes = ({ navigation }) => {
                         </Text>
                     </View>
                 </View>
+                {typeof item.imagePath === 'string' && item.imagePath.trim().length > 0 ? (
                 <Image
                     style={superVisorEmployeeRequestStyles.image}
                     source={{ uri: item.imagePath }}
                 />
+                ) : null}
                 <View style={superVisorEmployeeRequestStyles.item_views_top}>
                     <View style={superVisorEmployeeRequestStyles.image_bg}>
                         <Image

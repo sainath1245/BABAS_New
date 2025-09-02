@@ -55,21 +55,21 @@ const Help = ({ navigation }) => {
                     {
                         userRole == 3 ?
                             <WebView
-                                onLoad={() => { setLoading(false) }}
+                                onLoadEnd={() => { setLoading(false) }}
                                 source={{
                                     uri: 'https://docs.google.com/document/d/1ET-ps0PTfkmCcoeMa6qOZNKDGdfNvqEfeDGN7D-vmhY/edit?usp=sharing',
                                 }}
                                 javaScriptEnabled={false}
                                 style={{ flex: 1, width: width * 1, marginTop: -90 }}
                             /> : userRole == 2 ? <WebView
-                                onLoad={() => { setLoading(false) }}
+                                onLoadEnd={() => { setLoading(false) }}
                                 source={{
                                     uri: 'https://docs.google.com/document/d/17fUUDIQs9S_iT-jLxXTCIwXinwyt5RkeD9c51HKkUfc/edit?usp=sharing',
                                 }}
                                 javaScriptEnabled={false}
                                 style={{ flex: 1, width: width * 1, marginTop: -90 }}
                             /> : <WebView
-                                onLoad={() => { setLoading(false) }}
+                                onLoadEnd={() => { setLoading(false) }}
                                 source={{
                                     uri: 'https://docs.google.com/document/d/1_Rpo1XM7itt81E6bkLeV0efURBzqIZAEDSdsrkAP2Lg/edit?usp=sharing',
                                 }}

@@ -94,79 +94,79 @@ export const deleteTableAllRows = ((db) => {
 })
 
 // Table & quries for Clock In/Out
-export const createClockTabel = ((db) => {
-    db.transaction(function (txn) {
-        txn.executeSql(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='CLOCK_DATA'",
-            [],
-            function (tx, res) {
-                console.log('item:', res.rows.length);
-                if (res.rows.length == 0) {
-                    console.log("already created  - CLOCK TABLE");
-                    txn.executeSql('DROP TABLE IF EXISTS CLOCK_DATA', []);
-                    txn.executeSql(
-                        'CREATE TABLE IF NOT EXISTS CLOCK_DATA(id INTEGER PRIMARY KEY AUTOINCREMENT, userID INT(20), longitude REAL(20), latitude REAL(20), startDate VARCHAR(20), startTime VARCHAR(20), startDateTime VARCHAR(30), requestType int(20), workType int(20), shopName VARCHAR(50), location VARCHAR(50), remark VARCHAR(50), image LONGTEXT(255))',
-                        []
-                    );
-                } else {
-                    console.log("Clock Table created  - CLOCK TABLE");
-                }
-            }
-        );
-    });
-})
+// export const createClockTabel = ((db) => {
+//     db.transaction(function (txn) {
+//         txn.executeSql(
+//             "SELECT name FROM sqlite_master WHERE type='table' AND name='CLOCK_DATA'",
+//             [],
+//             function (tx, res) {
+//                 console.log('item:', res.rows.length);
+//                 if (res.rows.length == 0) {
+//                     console.log("already created  - CLOCK TABLE");
+//                     txn.executeSql('DROP TABLE IF EXISTS CLOCK_DATA', []);
+//                     txn.executeSql(
+//                         'CREATE TABLE IF NOT EXISTS CLOCK_DATA(id INTEGER PRIMARY KEY AUTOINCREMENT, userID INT(20), longitude REAL(20), latitude REAL(20), startDate VARCHAR(20), startTime VARCHAR(20), startDateTime VARCHAR(30), requestType int(20), workType int(20), shopName VARCHAR(50), location VARCHAR(50), remark VARCHAR(50), image LONGTEXT(255))',
+//                         []
+//                     );
+//                 } else {
+//                     console.log("Clock Table created  - CLOCK TABLE");
+//                 }
+//             }
+//         );
+//     });
+// })
 
-export const insertClock = ((db, userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image) => {
-    console.log(' CLOCK IN INSERT : ', db, userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image)
-    db.transaction(function (tx) {
-        tx.executeSql(
-            'INSERT INTO CLOCK_DATA (userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-            [userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image],
-            (tx, results) => {
-                console.log('Results;;;  ', results.rowsAffected);
-                if (results.rowsAffected > 0) {
-                    console.log('Clock Data Added Successfully :: ' + date);
-                } else {
-                    console.log('Failed');
-                }
-            },
-        );
-    });
-})
+// export const insertClock = ((db, userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image) => {
+//     console.log(' CLOCK IN INSERT : ', db, userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image)
+//     db.transaction(function (tx) {
+//         tx.executeSql(
+//             'INSERT INTO CLOCK_DATA (userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+//             [userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image],
+//             (tx, results) => {
+//                 console.log('Results;;;  ', results.rowsAffected);
+//                 if (results.rowsAffected > 0) {
+//                     console.log('Clock Data Added Successfully :: ' + date);
+//                 } else {
+//                     console.log('Failed');
+//                 }
+//             },
+//         );
+//     });
+// })
 
-export const deleteTableAllClockRequest = ((db) => {
-    db.transaction(function (tx) {
-        tx.executeSql(
-            'DELETE FROM CLOCK_DATA',
-            [],
-            (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
-                if (results.rowsAffected > 0) {
-                    console.log('Clock Request Data removed Successfully :: ');
-                } else {
-                    console.log('Failed');
-                }
-            }
-        );
-    })
-})
+// export const deleteTableAllClockRequest = ((db) => {
+//     db.transaction(function (tx) {
+//         tx.executeSql(
+//             'DELETE FROM CLOCK_DATA',
+//             [],
+//             (tx, results) => {
+//                 console.log('result  :::  ' + results.rowsAffected);
+//                 if (results.rowsAffected > 0) {
+//                     console.log('Clock Request Data removed Successfully :: ');
+//                 } else {
+//                     console.log('Failed');
+//                 }
+//             }
+//         );
+//     })
+// })
 
-export const deleteSingleClockRequest = ((db, id) => {
-    db.transaction(function (tx) {
-        tx.executeSql(
-            'DELETE FROM CLOCK_DATA WHERE id = ' + id,
-            [],
-            (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
-                if (results.rowsAffected > 0) {
-                    console.log('Clock Request Data removed Successfully :: ' + id);
-                } else {
-                    console.log('Failed');
-                }
-            }
-        );
-    })
-})
+// export const deleteSingleClockRequest = ((db, id) => {
+//     db.transaction(function (tx) {
+//         tx.executeSql(
+//             'DELETE FROM CLOCK_DATA WHERE id = ' + id,
+//             [],
+//             (tx, results) => {
+//                 console.log('result  :::  ' + results.rowsAffected);
+//                 if (results.rowsAffected > 0) {
+//                     console.log('Clock Request Data removed Successfully :: ' + id);
+//                 } else {
+//                     console.log('Failed');
+//                 }
+//             }
+//         );
+//     })
+// })
 
 // Table & quries for Attendance Type
 export const createAttendanceTypeTabel = ((db) => {
@@ -193,7 +193,7 @@ export const createAttendanceTypeTabel = ((db) => {
 })
 
 export const insertAttendanceType = ((db, typeId, typeValue) => {
-    console.log('coming here at initial :: :: :: ' + typeValue)
+    // console.log('coming here at initial :: :: :: ' + typeValue)
     db.transaction(function (tx) {
         tx.executeSql(
             'INSERT INTO attendance_type (typeId, typeValue) VALUES (?,?)',

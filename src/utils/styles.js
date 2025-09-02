@@ -87,16 +87,16 @@ const loginPageStyles = StyleSheet.create({
         flexDirection: 'column',
         backgroundColor: 'white',
     },
-    svg_bell_icons: {
-        resizeMode: "contain",
-        height: 20,
-        width: 20,
-        marginRight: 15,
-        tintColor: '#e0e0e0'
-    },
+    // svg_bell_icons: {
+    //     resizeMode: "contain",
+    //     height: 20,
+    //     width: 20,
+    //     marginRight: 25,
+    //     tintColor: '#a22828ff',
+    // },
     container_1: {
         flex: 1,
-        marginTop: -56,
+        // marginTop: -56,
         flexDirection: 'column',
         backgroundColor: 'white',
     },
@@ -187,6 +187,14 @@ const loginPageStyles = StyleSheet.create({
         tintColor: '#000000',
     },
     svg_bell_icons: {
+        resizeMode: "contain",
+        height: 20,
+        width: 20,
+        marginRight: 15,
+        // tintColor: '#e0e0e0'
+        tintColor: 'black'
+    },
+    svg_bell_icons_white: {
         resizeMode: "contain",
         height: 20,
         width: 20,
@@ -375,6 +383,7 @@ const employeesForgotPasswordPageStyles = StyleSheet.create({
     back_btn_layout: {
         marginTop: 20,
         position: 'absolute',
+        backgroundColor: 'red'
     },
     back_btn_layout_1: {
         marginTop: 20,
@@ -468,7 +477,7 @@ const clockInPageStyles = StyleSheet.create({
     back_btn: {
         resizeMode: "contain",
         height: 25,
-        padding: 10,
+        // padding: 10,
         width: 25,
         margin: 20,
     },
@@ -483,6 +492,7 @@ const clockInPageStyles = StyleSheet.create({
         position: 'absolute',
         flexDirection: 'row',
         alignItems: 'center',
+        marginTop: 15,
     },
     content_container: {
         flex: 1,
@@ -611,7 +621,7 @@ const EmployeesUploadDocumentsPageStyles = ({
     },
     upload_btn: {
         height: 20,
-        padding: 10,
+        // padding: 10,
         width: 20,
         tintColor: 'black'
     },
@@ -646,7 +656,7 @@ const EmployeesUploadDocumentsPageStyles = ({
     },
     camera_btn: {
         height: 20,
-        padding: 10,
+        // padding: 10,
         width: 20,
         tintColor: '#fb0f0c'
     },
@@ -1534,7 +1544,7 @@ const adminSuperVisorMapping = StyleSheet.create({
     },
     bottom_btns: {
         height: 20,
-        padding: 10,
+        // padding: 10,
         width: 20,
         margin: 20,
         tintColor: 'gray',

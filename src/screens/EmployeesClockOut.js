@@ -277,7 +277,7 @@ const EmployeesClockOut = ({route, navigation}) => {
 
     // This function is to set the UI
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        // <SafeAreaView style={{ flex: 1 }}>
             <View style={loginPageStyles.container}>
                 <StatusBar barStyle="default"
                     backgroundColor="#FA0F0A" />
@@ -303,9 +303,9 @@ const EmployeesClockOut = ({route, navigation}) => {
                     <TouchableOpacity
                         style={{ position: 'absolute', alignSelf: 'flex-end', marginTop: 20 }}
                         onPress={() => { navigation.navigate('Notifications') }}>
-                        <View style={{ flexDirection: 'row', paddingEnd: 8 }}>
+                        <View style={{ flexDirection: 'row', paddingEnd: 8, marginTop: 20 }}>
                             <Image
-                                style={loginPageStyles.svg_bell_icons}
+                                style={loginPageStyles.svg_bell_icons_white}
                                 source={require('../assets/images/notification.png')}
                             />
               {notificationCount > 0 ? (
@@ -470,7 +470,7 @@ const EmployeesClockOut = ({route, navigation}) => {
                     <ActivityIndicator color={'#fff'} />
                 </Modal>
             </View>
-        </SafeAreaView>
+        // </SafeAreaView>
     );
 };
 

@@ -22,7 +22,8 @@ import {
     Image,
     Text,
     ActivityIndicator,
-    View
+    View,
+    Pressable
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-gesture-handler';
@@ -64,13 +65,15 @@ import SuperVisorHistory from '../screens/SuperVisorHistory';
 import SuperVisorHistoryDetail from '../screens/SuperVisorHistoryDetail';
 import SuperVisorHome from '../screens/SuperVisorHome';
 import {BASE_URL} from './consts';
-import {EmployeesUploadDocumentsPageStyles, loginPageStyles} from './styles';
+import {adminSuperVisorMapping, EmployeesUploadDocumentsPageStyles, loginPageStyles} from './styles';
 import DeviceInfo from 'react-native-device-info';
 import NonBabasLogin from "../screens/NonBabasLogin";
 import NonBabasDashboard from "../screens/NonBabasDashboard";
 import Privacy from "../screens/Privacy";
 import Modal from 'react-native-modal';
 import SuperVisorNotificationDetail from "../screens/SuperVisorNotificationDetail";
+import AdminEmployeeMapping from "../screens/AdminEmployeeMapping";
+import AdminGARR from "../screens/AdminGARR";
 
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
@@ -79,6 +82,9 @@ var backgroundColor =
   BASE_URL === 'https://mobileapi-dev.babasap.com/api/'
     ? '#06787A99'
     : '#FA0F0A99';
+var headerBackground = BASE_URL === 'https://mobileapi-dev.babasap.com/api/'
+    ? '#71a96fff' : 'white'
+    // '#a57272ff'
 
 const CustomDrawerContent = (props) => {
   const dispatch = useDispatch();
@@ -140,7 +146,7 @@ const CustomDrawerContent = (props) => {
     return message;
 }
     // This function is to call logout API 
-    callLogoutAPI = async (token) => {
+    const callLogoutAPI = async (token) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -156,7 +162,7 @@ const CustomDrawerContent = (props) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status ' + response.status);
                 }
             })
             .then((data) => {
@@ -172,7 +178,7 @@ const CustomDrawerContent = (props) => {
           });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);
-                    deleteTableAllClockRequest(db);
+                    // deleteTableAllClockRequest(db);
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'Login' }],
@@ -186,6 +192,10 @@ const CustomDrawerContent = (props) => {
             })
             .catch((error) => {
                 console.log('==ERROR== : ' + error)
+                Alert.alert(
+                        "Alert!",
+                        error.message,
+                    )
             })
             .finally(() => {
                 // setLoading(false);
@@ -319,7 +329,7 @@ const CustomDrawerContent = (props) => {
     }
 
     // This function is to call Account deactivation API 
-    callDeactivateAccountAPI = async (token) => {
+    const callDeactivateAccountAPI = async (token) => {
         var userType = ''
         var number = 0
         if (email == '' || email == null) {
@@ -417,7 +427,7 @@ const CustomDrawerContent = (props) => {
       contentContainerStyle={{
         flex: 1,
         justifyContent: 'space-between',
-        minHeight: 790,
+        minHeight: userRole == 1 ? 890 : height
       }}>
       <>
         <Modal
@@ -525,25 +535,28 @@ const CustomDrawerContent = (props) => {
                         />
                     }
                     onPress={() => {
-                        db.transaction((tx) => {
-                            tx.executeSql(
-                                'SELECT * FROM CLOCK_DATA',
-                                [],
-                                (tx, results) => {
-                                    var temp = [];
-                                    for (let i = 0; i < results.rows.length; ++i) {
-                                        temp.push(results.rows.item(i));
-                                        console.log('======results.rows.item(i).id====' + results.rows.item(i).id)
-                                    }
-                                    console.log('======temp' + temp.length)
+                        // db.transaction((tx) => {
+                        //     tx.executeSql(
+                        //         'SELECT * FROM CLOCK_DATA',
+                        //         [],
+                        //         (tx, results) => {
+                        //             var temp = [];
+                        //             for (let i = 0; i < results.rows.length; ++i) {
+                        //                 temp.push(results.rows.item(i));
+                        //                 console.log('======results.rows.item(i).id====' + results.rows.item(i).id)
+                        //             }
+                        //             console.log('======temp' + temp.length)
 
-                                    // var message = '';
-                                    // if (temp.length > 0) {
-                                    //     message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
-                                    // } else {
-                                    //     message = 'Are you sure you want to Sign Out?'
-                                    // }
-                                    let message = 'Are you sure you want to Sign Out?'
+                        //             // var message = '';
+                        //             // if (temp.length > 0) {
+                        //             //     message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
+                        //             // } else {
+                        //             //     message = 'Are you sure you want to Sign Out?'
+                        //             // }
+                                    
+                        //         });
+                        // });
+                        let message = 'Are you sure you want to Sign Out?'
                                     Alert.alert(
                                         "Alert!",
                                         message,
@@ -561,8 +574,6 @@ const CustomDrawerContent = (props) => {
                                             }
                                         ]
                                     )
-                                });
-                        });
                     }}
                 />
                 <DrawerItem
@@ -644,7 +655,7 @@ const EmployeesHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
-                height: height
+                // height: height
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -654,23 +665,25 @@ const EmployeesHomeDrawer = () => {
             drawerContentStyle: {
                 marginTop: 56
             },
-            drawerIcon: () => (
-                <Image
-                    style={[loginPageStyles.svg_icons, { tintColor: 'white' }]}
-                />
-            ),
+            // drawerIcon: () => (
+            //     <Image
+            //         style={[loginPageStyles.svg_icons, { tintColor: 'white' }]}
+            //     />
+            // ),
             headerTitleAlign: 'left',
         }}>
             <Drawer.Screen name="Home" component={EmployeesHome} options={{
-                unmountOnBlur: true,
+                // unmountOnBlur: true,
                 title: 'Home', headerStyle: {
-                    backgroundColor: 'transparent',
-                    elevation: 0,
-                    shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16,
-                }, headerTintColor: 'white',
+                    backgroundColor: headerBackground,
+                    // elevation: 0,
+                    // shadowOpacity: 0,
+                },
+                // }, headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16,
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -707,14 +720,17 @@ const EmployeesHomeDrawer = () => {
       />
             <Drawer.Screen name="History" component={EmployeesHistory} options={{
                 unmountOnBlur: true,
-                title: 'History', headerStyle: {
-                    backgroundColor: 'transparent',
+                title: 'History',
+                headerStyle: {
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -722,7 +738,7 @@ const EmployeesHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -745,20 +761,22 @@ const EmployeesHomeDrawer = () => {
                   style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
                 />
               )}
-            </TouchableOpacity>
+            </Pressable>
           ),
         }}
       />
             <Drawer.Screen name="Change Password" component={EmployeesChangePassword} options={{
                 unmountOnBlur: true,
                 title: 'Change Password', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -766,7 +784,7 @@ const EmployeesHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -786,20 +804,22 @@ const EmployeesHomeDrawer = () => {
               ) : (
                 <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
               )}
-            </TouchableOpacity>
+            </Pressable>
           ),
         }}
       />
             <Drawer.Screen name="Help" component={Help} options={{
                 unmountOnBlur: true,
                 title: 'Help', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -807,7 +827,7 @@ const EmployeesHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -830,7 +850,7 @@ const EmployeesHomeDrawer = () => {
                   style={EmployeesUploadDocumentsPageStyles.white_circle_badge}
                 />
               )}
-            </TouchableOpacity>
+            </Pressable>
           ),
         }}
       />
@@ -855,7 +875,7 @@ const SuperVisorHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
-                height: height
+                // height: height
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -874,14 +894,17 @@ const SuperVisorHomeDrawer = () => {
         }}>
             <Drawer.Screen name="Home" component={SuperVisorHome} options={{
                 unmountOnBlur: true,
-                title: 'Home', headerStyle: {
-                    backgroundColor: 'transparent',
+                title: 'Home',
+                headerStyle: {
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -889,7 +912,7 @@ const SuperVisorHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -905,19 +928,22 @@ const SuperVisorHomeDrawer = () => {
                         ) : (
                             <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                         )}
-                    </TouchableOpacity>
+                    </Pressable>
                 ),
             }} />
             <Drawer.Screen name="History" component={SuperVisorHistory} options={{
                 unmountOnBlur: true,
-                title: 'History', headerStyle: {
-                    backgroundColor: 'transparent',
+                title: 'History',
+                headerStyle: {
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -925,7 +951,7 @@ const SuperVisorHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -941,19 +967,21 @@ const SuperVisorHomeDrawer = () => {
                         ) : (
                             <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                         )}
-                    </TouchableOpacity>
+                    </Pressable>
                 ),
             }} />
             <Drawer.Screen name="Approval History" component={SuperVisorApprovalHistory} options={{
                 unmountOnBlur: true,
                 title: 'Approval History', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -961,7 +989,7 @@ const SuperVisorHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -977,7 +1005,7 @@ const SuperVisorHomeDrawer = () => {
                         ): (
                             <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                         )}
-                    </TouchableOpacity>
+                    </Pressable>
                 ),
             }} />
             <Drawer.Screen name="Attendance Approval" initialParams={{
@@ -990,13 +1018,15 @@ const SuperVisorHomeDrawer = () => {
                 unmountOnBlur: true,
                 title: 'Attendance Approval',
                 headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16,
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16,
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1005,7 +1035,7 @@ const SuperVisorHomeDrawer = () => {
                 ),
                 headerRight: () =>
                     <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity
+                        <Pressable
                             onPress={() => { navigation.navigate('Notifications') }}
                             style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                             <Image
@@ -1021,19 +1051,21 @@ const SuperVisorHomeDrawer = () => {
                             ) : (
                                 <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                             )}
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
             }} />
             <Drawer.Screen name="Change Password" component={EmployeesChangePassword} options={{
                 unmountOnBlur: true,
                 title: 'Change Password', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1041,7 +1073,7 @@ const SuperVisorHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -1057,19 +1089,21 @@ const SuperVisorHomeDrawer = () => {
                         ) : (
                             <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                         )}
-                    </TouchableOpacity>
+                    </Pressable>
                 ),
             }} />
             <Drawer.Screen name="Help" component={Help} options={{
                 unmountOnBlur: true,
                 title: 'Help', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1077,7 +1111,7 @@ const SuperVisorHomeDrawer = () => {
                     />
                 ),
                 headerRight: () => (
-                    <TouchableOpacity
+                    <Pressable
                         onPress={() => { navigation.navigate('Notifications') }}
                         style={{ flexDirection: 'row', marginRight: 10, paddingTop: 10 }}>
                         <Image
@@ -1093,7 +1127,7 @@ const SuperVisorHomeDrawer = () => {
                         ) : (
                             <View style={EmployeesUploadDocumentsPageStyles.white_circle_badge}></View>
                         )}
-                    </TouchableOpacity>
+                    </Pressable>
                 ),
             }} />
         </Drawer.Navigator>
@@ -1110,6 +1144,7 @@ const AdminHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
+                height: 690
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -1129,13 +1164,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminDashboard" component={AdminDashboard} options={{
                 unmountOnBlur: true,
                 title: 'Home', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0,
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1146,13 +1183,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminResetPasswordByEmpID" component={AdminResetPasswordByEmpID} options={{
                 unmountOnBlur: true,
                 title: 'Reset Password', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0,
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1163,13 +1202,34 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminSupervisorMapping" component={AdminSupervisorMapping} options={{
                 unmountOnBlur: true,
                 title: 'Supervisor Delegation', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
+                drawerIcon: ({ focused, size }) => (
+                    <Image
+                        style={loginPageStyles.svg_icons}
+                        source={require('../assets/images/ic_document.png')}
+                    />
+                ),
+            }} />
+            <Drawer.Screen name="AdminEmployeeMapping" component={AdminEmployeeMapping} options={{
+                unmountOnBlur: true,
+                title: 'Employee Delegation', headerStyle: {
+                    backgroundColor: headerBackground,
+                    elevation: 0,
+                    shadowOpacity: 0
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1180,13 +1240,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminManageType" component={AdminManageType} options={{
                 unmountOnBlur: true,
                 title: 'Attendance Type', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1197,13 +1259,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="Change Password" component={EmployeesChangePassword} options={{
                 unmountOnBlur: true,
                 title: 'Change Password', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1214,13 +1278,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminActivityLog" component={AdminActivityLog} options={{
                 unmountOnBlur: true,
                 title: 'Activity Log', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1231,13 +1297,15 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="Help" component={Help} options={{
                 unmountOnBlur: true,
                 title: 'Help', headerStyle: {
-                    backgroundColor: 'transparent',
+                    backgroundColor: headerBackground,
                     elevation: 0,
                     shadowOpacity: 0
-                }, headerTitleStyle: {
-                    color: 'white',
-                    fontSize: 16
-                }, headerTintColor: 'white',
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
                 drawerIcon: ({ focused, size }) => (
                     <Image
                         style={loginPageStyles.svg_icons}
@@ -1245,6 +1313,26 @@ const AdminHomeDrawer = () => {
                     />
                 ),
             }} />
+            <Drawer.Screen name="Attendance Range Report" component={AdminGARR} options={{
+                unmountOnBlur: true,
+                title: 'Attendance Range Report', headerStyle: {
+                    backgroundColor: headerBackground,
+                    elevation: 0,
+                    shadowOpacity: 0
+                },
+                // headerTitleStyle: {
+                //     color: 'white',
+                //     fontSize: 16
+                // },
+                headerTintColor: 'black',
+                drawerIcon: ({ focused, size }) => (
+                    <Image
+                        style={loginPageStyles.svg_icons}
+                        source={require('../assets/images/ic_document.png')}
+                    />
+                )
+        }}
+      />
         </Drawer.Navigator>
     );
 };

@@ -159,7 +159,7 @@ const EmployeesClockIn = ({route, navigation}) => {
     });
   };
 
-  callApiToGetSrverTime = async item => {
+  const callApiToGetSrverTime = async item => {
     console.log('token123 In Employee ClockIn:: ' + item);
     console.log('timer in clockIn...');
     const requestOptions = {
@@ -216,7 +216,7 @@ const EmployeesClockIn = ({route, navigation}) => {
 
   // This function is to set the UI
   return (
-    <SafeAreaView style={{flex: 1}}>
+    // <SafeAreaView style={{flex: 1}}>
       <View style={loginPageStyles.container}>
         <StatusBar barStyle="default" backgroundColor="#FA0F0A" />
         <View style={{flexDirection: 'column'}}>
@@ -244,9 +244,9 @@ const EmployeesClockIn = ({route, navigation}) => {
             onPress={() => {
               navigation.navigate('Notifications');
             }}>
-            <View style={{flexDirection: 'row', paddingEnd: 8}}>
+            <View style={{flexDirection: 'row', paddingEnd: 8, marginTop: 20}}>
               <Image
-                style={loginPageStyles.svg_bell_icons}
+                style={loginPageStyles.svg_bell_icons_white}
                 source={require('../assets/images/notification.png')}
               />
               {notificationCount > 0 ? (
@@ -398,7 +398,7 @@ const EmployeesClockIn = ({route, navigation}) => {
           <ActivityIndicator color={'#fff'} />
         </Modal>
       </View>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 };
 

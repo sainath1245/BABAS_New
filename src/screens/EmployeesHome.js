@@ -43,6 +43,7 @@ const EmployeesHome = ({ navigation }) => {
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
+        console.log('temp user details--', temp[0]);
         setUserId(temp[0].userId);
         setName(temp[0].firstName);
         setDesignation(temp[0].desigination);
@@ -50,7 +51,7 @@ const EmployeesHome = ({ navigation }) => {
         AsyncStorage.getItem('token', (_err, deviceToken) => {
           AsyncStorage.getItem('FCM_token', (_error, fcmToken) => {
             setToken(deviceToken);
-            getWorkType(deviceToken, fcmToken);
+            getWorkType(deviceToken, fcmToken, temp[0].userId);
           });
         });
       });
@@ -59,8 +60,8 @@ const EmployeesHome = ({ navigation }) => {
 
 
   // This function is to get Dashboard data and for managin some conditions
-  getWorkType = async (deviceToken, fcmToken) => {
-    var number = parseInt(userId, 10);
+  const getWorkType = async (deviceToken, fcmToken, userIdDetails) => {
+    var number = parseInt(userIdDetails, 10);
     const requestOptions = {
       method: 'POST',
       headers: {

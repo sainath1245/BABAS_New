@@ -1,0 +1,31 @@
+diff --git a/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/MarkTextOptions.kt b/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/MarkTextOptions.kt
+index 31b3043..3b7d2b0 100644
+--- a/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/MarkTextOptions.kt
++++ b/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/MarkTextOptions.kt
+@@ -11,7 +11,7 @@ class MarkTextOptions(options: ReadableMap) : Options(options) {
+     if (waterMarkTextsMap!!.size() > 0) {
+       watermarkTexts = arrayOfNulls(waterMarkTextsMap.size())
+       for (i in 0 until waterMarkTextsMap.size()) {
+-        val textMap = waterMarkTextsMap.getMap(i)
++        val textMap = waterMarkTextsMap.getMap(i)!!
+         watermarkTexts[i] = TextOptions(textMap)
+       }
+     }
+diff --git a/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/Utils.kt b/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/Utils.kt
+index 9c81ce6..89e64b1 100644
+--- a/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/Utils.kt
++++ b/node_modules/react-native-image-marker/android/src/main/java/com/jimmydaddy/imagemarker/base/Utils.kt
+@@ -163,11 +163,9 @@ class Utils {
+       return if (d == null) "0"
+       else
+           when (d.type) {
+-            ReadableType.String -> d.asString()
++            ReadableType.String -> d.asString() ?: "0"
+             ReadableType.Number -> d.asDouble().toString()
+-            else -> {
+-              "0"
+-            }
++            else -> "0"
+           }
+     }
+   }

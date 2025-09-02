@@ -509,7 +509,7 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
 
     // This function is to set the UI 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
+        // <SafeAreaView style={{ flex: 1 }}>
             <View style={loginPageStyles.container}>
                 <StatusBar barStyle="default"
                     backgroundColor="#FA0F0A" />
@@ -910,7 +910,7 @@ const EmployeesUploadDocuments = ({ route, navigation }) => {
                     </View>
                 </Modal>
             </View>
-        </SafeAreaView>
+        // </SafeAreaView>
     );
 };
 

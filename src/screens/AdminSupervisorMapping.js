@@ -21,19 +21,21 @@ const AdminSupervisorMapping = ({ navigation }) => {
         // This function is to get token to call the APIs
         AsyncStorage.getItem('token', (err, item) => {
             setToken(item);
-        })
-        setLoading(true)
-        setTimeout(() => {
-            checkInternet();
-        }, 1000);
+            setLoading(true);
+            checkInternet(item);
+    });
+        // setLoading(true)
+        // setTimeout(() => {
+        //     checkInternet();
+        // }, 1000);
     }, [])
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
-    const checkInternet = () => {
+    const checkInternet = (item) => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
-                getSuperVisors();
+                getSuperVisors(item);
             } else {
                 setLoading(false);
                 console.log('-=-=-=-=-=-=-=-=-')
@@ -48,14 +50,14 @@ const AdminSupervisorMapping = ({ navigation }) => {
     }
 
     // This function is to get All supervisors from server
-    getSuperVisors = async () => {
+    const getSuperVisors = async (item) => {
         const requestOptions = {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': 'Bearer ' + item, 'Content-Type': 'application/json' },
             body: JSON.stringify({ empID: 0, empName: "" })
         };
         console.log('=======requestOptions====== ' + requestOptions.body)
-        console.log('=======token====== ' + token)
+        console.log('=======token====== ' + item)
         await fetch(BASE_URL + 'Admin/GetSupervisorList',
             requestOptions)
             .then(response => {
@@ -63,7 +65,7 @@ const AdminSupervisorMapping = ({ navigation }) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status ' + response.status);
                 }
             })
             .then((data) => {
@@ -75,12 +77,13 @@ const AdminSupervisorMapping = ({ navigation }) => {
                 } else {
                     Alert.alert(
                         "Alert!",
-                        dataArray.responseMessage,
+                        data.responseMessage,
                     )
                 }
             })
             .catch((error) => {
                 console.log('==ERROR== : ' + error)
+                Alert.alert("Alert!", error.message)
             })
             .finally(() => {
                 setLoading(false);
@@ -116,7 +119,9 @@ const AdminSupervisorMapping = ({ navigation }) => {
                             onPress={() => {
                                 navigation.navigate('AdminSelectNewApprover', {
                                     supervisorID: item.supervisorID,
-                                    dataArray: dataArray
+                                    supervisorList: dataArray,
+                                    isEmployeeDelegation: false,
+                                    employeeID: 0
                                 })
                             }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', width: 80, justifyContent: 'center', backgroundColor: '#E63627', height: 120 }}>

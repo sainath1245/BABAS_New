@@ -28,7 +28,7 @@ export const insertUser_1 = ((db, userId, token, firstName, lastName, email, use
             'INSERT INTO user (userId, token, firstName, lastName, email, userRole, desigination, location) VALUES (?,?,?,?,?,?,?,?)',
             [userId, token, firstName, lastName, email, userRole, desigination, location],
             (tx, results) => {
-                console.log('Results;;;  ', results.rowsAffected);
+                console.log('Results;;; insertUser_1 ', results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('User Data Added Successfully :: ' + userId);
                 } else {
@@ -82,7 +82,7 @@ export const deleteTableAllRows = ((db) => {
             'DELETE FROM user',
             [],
             (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
+                console.log('result deleteTableAllRows :::  ' + results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('User Data removed Successfully :: ');
                 } else {
@@ -123,7 +123,7 @@ export const insertClock = ((db, userID, longitude, latitude, startDate, startTi
             'INSERT INTO CLOCK_DATA (userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
             [userID, longitude, latitude, startDate, startTime, startDateTime, requestType, workType, shopName, location, remark, image],
             (tx, results) => {
-                console.log('Results;;;  ', results.rowsAffected);
+                console.log('Results;;;  insertClock', results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('Clock Data Added Successfully :: ' + date);
                 } else {
@@ -140,7 +140,7 @@ export const deleteTableAllClockRequest = ((db) => {
             'DELETE FROM CLOCK_DATA',
             [],
             (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
+                console.log('result deleteTableAllClockRequest :::  ' + results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('Clock Request Data removed Successfully :: ');
                 } else {
@@ -157,7 +157,7 @@ export const deleteSingleClockRequest = ((db, id) => {
             'DELETE FROM CLOCK_DATA WHERE id = ' + id,
             [],
             (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
+                console.log('result deleteSingleClockRequest :::  ' + results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('Clock Request Data removed Successfully :: ' + id);
                 } else {
@@ -199,7 +199,7 @@ export const insertAttendanceType = ((db, typeId, typeValue) => {
             'INSERT INTO attendance_type (typeId, typeValue) VALUES (?,?)',
             [typeId, typeValue],
             (tx, results) => {
-                console.log('Results;;;  ', results.rowsAffected);
+                console.log('Results;;; insertAttendanceType ', results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('Attendance Type Added Successfully.');
                 } else {
@@ -216,7 +216,7 @@ export const deleteTableAllAttendanceType = ((db) => {
             'DELETE FROM attendance_type',
             [],
             (tx, results) => {
-                console.log('result  :::  ' + results.rowsAffected);
+                console.log('result deleteTableAllAttendanceType :::  ' + results.rowsAffected);
                 if (results.rowsAffected > 0) {
                     console.log('Attendance Type Data removed Successfully :: ');
                 } else {

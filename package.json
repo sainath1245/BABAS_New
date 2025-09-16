@@ -8,7 +8,10 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "eslint .",
-    "clean": "rm -rf node_modules/ && rm yarn.lock && rm -rf android/app/build && yarn cache clean && yarn install && cd android && ./gradlew clean && cd .."
+    "clean": "rm -rf node_modules/ && rm yarn.lock && rm -rf android/app/build && yarn cache clean && yarn install && cd android && ./gradlew clean && cd ..",
+    "showLogs": "yarn react-native log-android",
+    "releaseAndroidBuild": "cd android && ./gradlew assembleRelease",
+    "cleanGradlew": "cd android && ./gradlew clean && cd .."
   },
   "dependencies": {
     "@codler/react-native-keyboard-aware-scroll-view": "^2.0.1",

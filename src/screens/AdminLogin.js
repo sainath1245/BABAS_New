@@ -127,7 +127,7 @@ const AdminLogin = ({ navigation }) => {
                 console.log('==== EMAIL==== ' + data);
                 let json = data;
 
-                if (json.responseCode == 200) {
+                if (json.responseCode === 200) {
                     deleteTableAllRows(db);
 
                     var jwtDecode = require('jwt-decode');

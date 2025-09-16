@@ -33,9 +33,10 @@ const AdminDelegateDetails = ({ route, navigation }) => {
     const [show_1, setShow_1] = useState(false);
     const [dobToShow_1, setDOBToShow_1] = useState('Select Date');
 
-    const { supervisorID, newApproverId } = route.params;
+    const { supervisorID, newApproverId, isEmployeeDelegation, employeeID } = route.params;
 
-    console.log(supervisorID, newApproverId);
+    // console.log('details--',supervisorID, newApproverId, isEmployeeDelegation, employeeID);
+    console.log(`superVisor-- ${supervisorID} newapprover-- ${newApproverId} isemplDetegation--${isEmployeeDelegation}  empID--${employeeID}`);
 
     const [loading, setLoading] = useState(false);
     const [isConnected, setConnected] = useState();
@@ -108,7 +109,7 @@ const AdminDelegateDetails = ({ route, navigation }) => {
     setEndDate(currentDate);
   };
     // This function is to send deligation data to server
-    callSuperVisorDelegation = async () => {
+    const callSuperVisorDelegation = async () => {
     if (dobToShow == 'Select Date') {
       Alert.alert('Alert!', 'Start date cannot be empty.');
       return;
@@ -122,21 +123,42 @@ const AdminDelegateDetails = ({ route, navigation }) => {
     var startDateToSend_1 = format(startDate, "yyyy-MM-dd");
     var endDateToSend_1 = format(endDate, "yyyy-MM-dd");
     var number = parseInt(userId);
-    var number_1 = parseInt(supervisorID);
+    // var number_1 = parseInt(supervisorID);
+     var number_1 = parseInt(isEmployeeDelegation ? employeeID : supervisorID);
     var number_2 = parseInt(newApproverId);
     console.log('startDateToSend_1 ', startDateToSend_1);
     console.log('endDateToSend_1', endDateToSend_1);
+ const bodyObj = isEmployeeDelegation ? {
+      adminID: number,
+      EmployeeId: number_1,
+      newApproverId: number_2,
+      startDate: startDateToSend_1,
+      endDate: endDateToSend_1,
+      delegationReason: reason,
+    }
+  : {
+      adminID: number,
+      supervisorId: number_1,
+      newApproverId: number_2,
+      startDate: startDateToSend_1,
+      endDate: endDateToSend_1,
+      delegationReason: reason,
+    };
+
+    const delegationEndPoint = isEmployeeDelegation
+      ? 'Admin/EmployeeDelegation'
+      : 'Admin/SupervisorDelegation';
+
     setLoading(true);
         const requestOptions = {
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                adminID: number, supervisorId: number_1, newApproverId: number_2,
-                startDate: startDateToSend_1, endDate: endDateToSend_1, delegationReason: reason
-            })
+            body: JSON.stringify(bodyObj)
         };
         console.log('--requestOptions.body--:' + requestOptions.body)
-        await fetch(BASE_URL + 'Admin/SupervisorDelegation',
+        console.log('delegationEndPoint not added in Axios--', BASE_URL + delegationEndPoint);
+
+        await fetch(BASE_URL + delegationEndPoint,
             requestOptions)
             .then(response => {
                 if (response.ok) {

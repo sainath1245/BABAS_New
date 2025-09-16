@@ -66,6 +66,7 @@ const AdminDashboard = ({ navigation }) => {
                     for (let i = 0; i < results.rows.length; ++i) {
                         temp.push(results.rows.item(i));
                     }
+                    console.log('userID response', temp[0].userId);
                     setUserId(temp[0].userId);
                     setName(temp[0].firstName);
                     setDesignation(temp[0].desigination);
@@ -76,20 +77,25 @@ const AdminDashboard = ({ navigation }) => {
         // This function is to get token to call the APIs
         AsyncStorage.getItem('token', (err, item) => {
             setToken(item);
+            checkInternet(item);
         })
-        setTimeout(() => {
-            checkInternet();
-        }, 1000);
-    }, []);
+        // setTimeout(() => {
+        //     checkInternet();
+        // }, 1000);
+        if (userId && token) {
+            // getWorkType();
+            getWorkType(fcmToken, token);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
-    const checkInternet = () => {
+    const checkInternet = (item) => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
                 AsyncStorage.getItem('FCM_token', (err, fcmToken) => {
-                    getDashboardData(fcmToken);
-                    getWorkType(fcmToken);
+                    getDashboardData(fcmToken, item);
                 })
             } else {
                 setLoading(false)
@@ -112,11 +118,13 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to get Dashboard data from server
-    getDashboardData = async (fcmToken) => {
+    const getDashboardData = async (fcmToken, item) => {
         var number = parseInt(userId);
+        console.log('number in dashboardData', number);
+        console.log('token item--', item);
         const requestOptions = {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': 'Bearer ' + item, 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID: number, deviceToken: fcmToken })
         };
         await fetch(BASE_URL + 'Admin/GetAdminDashboard',
@@ -125,7 +133,7 @@ const AdminDashboard = ({ navigation }) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status ' + response.status);
                 }
             })
             .then((data) => {
@@ -137,6 +145,7 @@ const AdminDashboard = ({ navigation }) => {
                     setNoOfEmployee(json.data.employeeCount);
                     setNoOfSupervisor(json.data.supervisorCount);
                 } else {
+                    console.log('admin dashboard--', json.responseMessage);
                     Alert.alert(
                         "Alert!",
                         json.responseMessage,
@@ -144,7 +153,8 @@ const AdminDashboard = ({ navigation }) => {
                 }
             })
             .catch((error) => {
-                console.log('==ERROR== : ' + error)
+                console.log('==ERROR dashboard== : ' + error)
+                Alert.alert("Alert!", error.message)
             })
             .finally(() => {
                 // setLoading(false);
@@ -152,15 +162,16 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to get Attendance type & other conditions related data
-    getWorkType = async (fcmToken) => {
+    const getWorkType = async (fcmToken, item) => {
         var number = parseInt(userId);
+        console.log('number in getworktype', number);
+        console.log('token item in worktype', item);
         const requestOptions = {
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            headers: { 'Authorization': 'Bearer ' + item, 'Content-Type': 'application/json' },
             body: JSON.stringify({ userID: number, deviceToken: fcmToken })
         };
         console.log('=======requestOptions====== ' + requestOptions.body)
-        console.log('=======token====== ' + token)
         await fetch(BASE_URL + 'User/GetDashboardData',
             requestOptions)
             .then(response => {
@@ -168,7 +179,7 @@ const AdminDashboard = ({ navigation }) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status ' + response.status);
                 }
             })
             .then((data) => {
@@ -257,6 +268,7 @@ const AdminDashboard = ({ navigation }) => {
                         ]
                     )
                 } else {
+                    console.log('admin getworktype--', json.responseMessage);
                     Alert.alert(
                         "Alert!",
                         json.responseMessage,
@@ -264,7 +276,8 @@ const AdminDashboard = ({ navigation }) => {
                 }
             })
             .catch((error) => {
-                console.log('==ERROR== : ' + error)
+                console.log('==ERROR getworktype== : ' + error)
+                Alert.alert("Alert!", error.message)
             })
             .finally(() => {
                 setLoading(false);
@@ -272,7 +285,7 @@ const AdminDashboard = ({ navigation }) => {
     }
 
     // This function is to call logout API to clear the login session
-    callLogoutAPI = async (token) => {
+    const callLogoutAPI = async (token) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -288,7 +301,7 @@ const AdminDashboard = ({ navigation }) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status 293' + response.status);
                 }
             })
             .then((data) => {
@@ -318,6 +331,7 @@ const AdminDashboard = ({ navigation }) => {
             })
             .catch((error) => {
                 console.log('==ERROR== : ' + error)
+                Alert.alert("Alert!", error.message)
             })
             .finally(() => {
                 // setLoading(false);

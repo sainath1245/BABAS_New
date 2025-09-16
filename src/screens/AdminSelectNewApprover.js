@@ -1,14 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FlatList, Image, StatusBar, Text, TouchableNativeFeedback, TouchableOpacity, View
 } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-navigation';
 import { EmployeesUploadDocumentsPageStyles, adminSuperVisorMapping, clockInPageStyles, employeesForgotPasswordPageStyles, historyPageStyles, loginPageStyles } from '../utils/styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from "@react-native-community/netinfo";
+import { BASE_URL } from '../utils/consts';
 
 const AdminSelectNewApprover = ({ route, navigation }) => {
-    const [dataArray_1, setDataArray_1] = useState([])
-    const { supervisorID, dataArray } = route.params;
+    const [dataArray_1, setDataArray_1] = useState([]);
+    const [dataArray, setDataArray] = useState([]);
+    const [token, setToken] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [isConnected, setConnected] = useState();
+
+    const { supervisorID, employeeID, supervisorList, isEmployeeDelegation } = route.params;
+    // console.log(`newApprover details--SID ${supervisorID},EID- ${employeeID}, SList-${supervisorList}, isEmployee-${isEmployeeDelegation}`);
+    
+    useEffect(() => {
+        if (isEmployeeDelegation) {
+    // This function is to get token to call the APIs
+    AsyncStorage.getItem('token', (err, item) => {
+      setToken(item);
+      setLoading(true);
+    checkInternet(item);
+    });
+    
+} else {
+    setDataArray(supervisorList)
+}
+  }, []);
+
+    // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
+
+    const checkInternet = (item) => {
+        NetInfo.fetch().then(state => {
+        console.log('no internet === ' + state.isConnected)
+        if (state.isConnected) {
+            getSuperVisors(item);
+        } else {
+            setLoading(false);
+                Alert.alert(
+                    "Alert!",
+                    "(Offline) No internet connection. Please try again later.",
+                )
+            }
+            setConnected(state.isConnected);
+        });
+        return (isConnected);
+    }
+    // This function is to get All supervisors from server
+
+    const getSuperVisors = async (item) => {
+        const requestOptions = {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + item, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ empID: 0, empName: "" })
+        };
+        console.log('=======requestOptions====== ' + requestOptions.body)
+        console.log('=======token====== ' + item)
+        await fetch(BASE_URL + 'Admin/GetSupervisorList',
+            requestOptions)
+            .then(response => {
+                console.log('====response.ok=====' + response.ok)
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Something went wrong, status ' + response.status);
+                }
+            })
+            .then((data) => {
+                console.log('==== resp  onseCode==== ' + data.responseCode);
+                let json = data;
+                if (json.responseCode == 200) {
+                    // console.log('==== resp ====' + json.data)
+                    setDataArray(json.data);
+                } else {
+                    Alert.alert(
+                        "Alert!",
+                        data.responseMessage,
+                    )
+                }
+            })
+            .catch((error) => {
+                console.log('==ERROR== : ' + error)
+                Alert.alert("Alert!", error.message)
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
 
     // This function is to set the UI for FlatList
     const renderItem = ({ item }) => (
@@ -39,7 +122,9 @@ const AdminSelectNewApprover = ({ route, navigation }) => {
                             onPress={() => {
                                 navigation.navigate('AdminDelegateDetails', {
                                     supervisorID: supervisorID,
-                                    newApproverId: item.supervisorID
+                                    newApproverId: item.supervisorID,
+                                    isEmployeeDelegation: isEmployeeDelegation,
+                                    employeeID: employeeID
                                 })
                             }}>
                             <View style={{ flexDirection: 'column', alignItems: 'center', width: 80, justifyContent: 'center', backgroundColor: '#E63627', height: 120 }}>

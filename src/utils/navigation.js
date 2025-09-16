@@ -71,6 +71,8 @@ import NonBabasDashboard from "../screens/NonBabasDashboard";
 import Privacy from "../screens/Privacy";
 import Modal from 'react-native-modal';
 import SuperVisorNotificationDetail from "../screens/SuperVisorNotificationDetail";
+import AdminEmployeeMapping from "../screens/AdminEmployeeMapping";
+import AdminGARR from "../screens/AdminGARR";
 
 var width = Dimensions.get('window').width;
 var height = Dimensions.get('window').height;
@@ -140,7 +142,7 @@ const CustomDrawerContent = (props) => {
     return message;
 }
     // This function is to call logout API 
-    callLogoutAPI = async (token) => {
+    const callLogoutAPI = async (token) => {
         var number = parseInt(userId);
         const requestOptions = {
             method: 'POST',
@@ -156,7 +158,7 @@ const CustomDrawerContent = (props) => {
                 if (response.ok) {
                     return response.json();
                 } else {
-                    throw new Error('Something went wrong :: ' + response.status);
+                    throw new Error('Something went wrong, status 161 ' + response.status);
                 }
             })
             .then((data) => {
@@ -172,7 +174,7 @@ const CustomDrawerContent = (props) => {
           });
                     dispatch(clearLogin());
                     deleteTableAllRows(db);
-                    deleteTableAllClockRequest(db);
+                    // deleteTableAllClockRequest(db);
                     navigation.reset({
                         index: 0,
                         routes: [{ name: 'Login' }],
@@ -185,7 +187,8 @@ const CustomDrawerContent = (props) => {
                 }
             })
             .catch((error) => {
-                console.log('==ERROR== : ' + error)
+                // console.log('==ERROR== : ' + error)
+                Alert.alert("Alert!",error.message)
             })
             .finally(() => {
                 // setLoading(false);
@@ -417,7 +420,8 @@ const CustomDrawerContent = (props) => {
       contentContainerStyle={{
         flex: 1,
         justifyContent: 'space-between',
-        minHeight: 790,
+        // minHeight: 790,
+         minHeight: userRole == 1 ? 920 : height
       }}>
       <>
         <Modal
@@ -525,25 +529,45 @@ const CustomDrawerContent = (props) => {
                         />
                     }
                     onPress={() => {
-                        db.transaction((tx) => {
-                            tx.executeSql(
-                                'SELECT * FROM CLOCK_DATA',
-                                [],
-                                (tx, results) => {
-                                    var temp = [];
-                                    for (let i = 0; i < results.rows.length; ++i) {
-                                        temp.push(results.rows.item(i));
-                                        console.log('======results.rows.item(i).id====' + results.rows.item(i).id)
-                                    }
-                                    console.log('======temp' + temp.length)
+                        // db.transaction((tx) => {
+                        //     tx.executeSql(
+                        //         'SELECT * FROM CLOCK_DATA',
+                        //         [],
+                        //         (tx, results) => {
+                        //             var temp = [];
+                        //             for (let i = 0; i < results.rows.length; ++i) {
+                        //                 temp.push(results.rows.item(i));
+                        //                 console.log('======results.rows.item(i).id====' + results.rows.item(i).id)
+                        //             }
+                        //             console.log('======temp' + temp.length)
 
-                                    // var message = '';
-                                    // if (temp.length > 0) {
-                                    //     message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
-                                    // } else {
-                                    //     message = 'Are you sure you want to Sign Out?'
-                                    // }
-                                    let message = 'Are you sure you want to Sign Out?'
+                        //             // var message = '';
+                        //             // if (temp.length > 0) {
+                        //             //     message = 'Please do not Sign Out when found any offline request pending for submission. Your request details will disappear after Sign Out.'
+                        //             // } else {
+                        //             //     message = 'Are you sure you want to Sign Out?'
+                        //             // }
+                        //             let message = 'Are you sure you want to Sign Out?'
+                        //             Alert.alert(
+                        //                 "Alert!",
+                        //                 message,
+                        //                 [
+                        //                     {
+                        //                         text: "Cancel",
+                        //                         onPress: () => console.log("Cancel Pressed"),
+                        //                         style: "cancel"
+                        //                     },
+                        //                     {
+                        //                         text: "Sign Out",
+                        //                         onPress: () => {
+                        //                             checkInternet();
+                        //                         }
+                        //                     }
+                        //                 ]
+                        //             )
+                        //         });
+                        // });
+                        let message = 'Are you sure you want to Sign Out?'
                                     Alert.alert(
                                         "Alert!",
                                         message,
@@ -561,8 +585,6 @@ const CustomDrawerContent = (props) => {
                                             }
                                         ]
                                     )
-                                });
-                        });
                     }}
                 />
                 <DrawerItem
@@ -644,7 +666,7 @@ const EmployeesHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
-                height: height
+                // height: height
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -855,7 +877,7 @@ const SuperVisorHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
-                height: height
+                // height: height
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -1110,6 +1132,7 @@ const AdminHomeDrawer = () => {
             drawerStyle: {
                 backgroundColor: backgroundColor,
                 width: width * .8,
+                minHeight: 710
             },
             drawerLabelStyle: {
                 color: 'white',
@@ -1163,6 +1186,23 @@ const AdminHomeDrawer = () => {
             <Drawer.Screen name="AdminSupervisorMapping" component={AdminSupervisorMapping} options={{
                 unmountOnBlur: true,
                 title: 'Supervisor Delegation', headerStyle: {
+                    backgroundColor: 'transparent',
+                    elevation: 0,
+                    shadowOpacity: 0
+                }, headerTitleStyle: {
+                    color: 'white',
+                    fontSize: 16
+                }, headerTintColor: 'white',
+                drawerIcon: ({ focused, size }) => (
+                    <Image
+                        style={loginPageStyles.svg_icons}
+                        source={require('../assets/images/ic_document.png')}
+                    />
+                ),
+            }} />
+            <Drawer.Screen name="AdminEmployeeMapping" component={AdminEmployeeMapping} options={{
+                unmountOnBlur: true,
+                title: 'Employee Delegation', headerStyle: {
                     backgroundColor: 'transparent',
                     elevation: 0,
                     shadowOpacity: 0
@@ -1242,6 +1282,23 @@ const AdminHomeDrawer = () => {
                     <Image
                         style={loginPageStyles.svg_icons}
                         source={require('../assets/images/help.png')}
+                    />
+                ),
+            }} />
+            <Drawer.Screen name="Attendance Range Report" component={AdminGARR} options={{
+                unmountOnBlur: true,
+                title: 'Attendance Range Report', headerStyle: {
+                    backgroundColor: 'transparent',
+                    elevation: 0,
+                    shadowOpacity: 0
+                }, headerTitleStyle: {
+                    color: 'white',
+                    fontSize: 16
+                }, headerTintColor: 'white',
+                drawerIcon: ({ focused, size }) => (
+                    <Image
+                        style={loginPageStyles.svg_icons}
+                        source={require('../assets/images/ic_document.png')}
                     />
                 ),
             }} />

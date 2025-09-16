@@ -33,7 +33,6 @@ const Splash = ({navigation}) => {
   const semver = require('semver');
 
   useEffect(() => {
-    // console.log('Splash screen called here....');
     notifee.cancelAllNotifications();
     console.log(
       'AsyncStorage.getItem :: ' +
@@ -118,11 +117,11 @@ const Splash = ({navigation}) => {
     );
   };
   const checkInternetConnection = async () => {
-    // console.log('checking internet');
+    console.log('checking internet');
     // setTextOnUI('Checking internet connection.');
     NetInfo.fetch().then(state => {
       if (state.isConnected) {
-        // console.log('isDataAvailable ---', isDataAvailable);
+        console.log('isDataAvailable ---', isDataAvailable);
         // setTextOnUI('Internet connection available. Fetching data.');
         setLoading(true);
         setNoNetCancelSelected(false);
@@ -173,7 +172,7 @@ const Splash = ({navigation}) => {
     //   }),
     // };
     // console.log('===requestOptions.body ===========' + requestOptions.body);
-    // console.log('FetchMethod called');
+    console.log('FetchMethod called');
     await fetch(BASE_URL + 'Version/GetVersion', requestOptions)
       //  await fetch(BASE_URL + 'Login/NonBabaUserLogin', requestOptions)
       .then(response => {
@@ -181,7 +180,9 @@ const Splash = ({navigation}) => {
         if (response.ok) {
           return response.json();
         } else {
-          throw new Error('Something went wrong, unable to fetch data.');
+          throw new Error(
+            'Something went wrong, status is---' + response.status,
+          );
         }
       })
       .then(data => {
@@ -212,7 +213,7 @@ const Splash = ({navigation}) => {
       .catch(error => {
         // console.log('Error Alert!: ' + error);
         //Previous error --- Cannot read property 'least_supported_app' of undefined
-        Alert.alert('Alert!', 'Something went wrong, please try later.');
+        Alert.alert('Alert!', error.message);
       })
       .finally(() => {
         setLoading(false);
@@ -228,6 +229,7 @@ const Splash = ({navigation}) => {
     return countOfChar;
   }
   function compareAppVersionWithStoreVersion() {
+    console.log('compare started');
     const iOSLeastSupportedVersion = serverLeastVersion;
     const androidLeastSupportedVersion = serverLeastVersion;
     var localDeviceInfoForAndroid = DeviceInfo.getVersion();
@@ -264,7 +266,7 @@ const Splash = ({navigation}) => {
           ],
         );
       } else {
-        // console.log('Navigate User to regular screen');
+        console.log('Navigate User to regular screen');
         navigateUserToParticularScreen();
       }
     } else {
@@ -316,7 +318,7 @@ const Splash = ({navigation}) => {
   // }, 2000);
 
   const navigateUserToParticularScreen = () => {
-    // console.log('navigation started here.....');
+    console.log('navigation started here.....');
     // setTextOnUI('navigation started here....');
     setTimeout(() => {
       // console.log('timer stated after 2 secs');

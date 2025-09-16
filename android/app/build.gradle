@@ -79,6 +79,9 @@ apply plugin: "com.facebook.react"
 
 project.ext.react = [
     enableHermes: false,  // clean and rebuild if changing
+    entryFile: "index.js",
+    bundleInDebug: true,   // 👈 bundle also in debug builds
+    bundleInRelease: true,
 ]
 
 //apply from: "../../node_modules/react-native/react.gradle"

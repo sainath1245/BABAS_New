@@ -28,7 +28,7 @@ const EmployeesHistory = ({ navigation }) => {
     const [selectedValueToSend, setSelectedValueTosend] = useState('All');
     const [item_height, setItemHeight] = useState(0);
     const [dataArray, setDataArray] = useState([]);
-    const [userId, setUserId] = useState('');
+    // const [userId, setUserId] = useState('');
     const [token, setToken] = useState('');
     const [loading, setLoading] = useState(false);
     const [isConnected, setConnected] = useState();
@@ -41,6 +41,7 @@ const EmployeesHistory = ({ navigation }) => {
     const [show, setShow] = useState(false);
   const minDate = moment().subtract(90, 'days').toDate();
   const [originalArray, setOriginalArray] = useState([]);
+  let userIdForAPI = 0;
 
     // This function is to get dynamic height of the UI component 
     const onLayout = (event) => {
@@ -64,27 +65,36 @@ const EmployeesHistory = ({ navigation }) => {
                     for (let i = 0; i < results.rows.length; ++i) {
                         temp.push(results.rows.item(i));
                     }
-                    setUserId(temp[0].userId);
+                    // setUserId(temp[0].userId);
+                    userIdForAPI = temp[0].userId;
+                    console.log('UserId from backend--', userIdForAPI);
+                    AsyncStorage.getItem('token', (err, item) => {
+                        setToken(item);
+                        checkInternet(item, userIdForAPI);
+        })
+                    
                 }
             );
         });
 
         // This function is to get token to call the APIs
-        AsyncStorage.getItem('token', (err, item) => {
-            setToken(item);
-        })
-        setTimeout(() => {
-            checkInternet();
-        }, 2000);
+        // AsyncStorage.getItem('token', (err, item) => {
+        //     setToken(item);
+        //     checkInternet(item);
+        // })
+        // setTimeout(() => {
+        //     checkInternet();
+        // }, 2000);
 
     }, [])
 
     // This function is to check the internet connection, if connection availave it will call API otherwise it will show error message 
-    const checkInternet = () => {
+    const checkInternet = (item, userIdForAPI) => {
         NetInfo.fetch().then(state => {
             console.log('no internet === ' + state.isConnected)
             if (state.isConnected) {
-                callHistoryAPI(dateToSend, selectedValueToSend);
+                console.log('item token checkinternet--', item);
+                callHistoryAPI(dateToSend, selectedValueToSend, item, userIdForAPI);
             } else {
                 setLoading(false);
                 console.log('-=-=-=-=-=-=-=-=-')
@@ -107,18 +117,21 @@ const EmployeesHistory = ({ navigation }) => {
     setDateToShow(moment(currentDate).format('DD/MM/YYYY'));
     // var formattedDate = format(currentDate, "yyyy-MM-dd");
     const formattedDate = format(currentDate, 'dd/MM/yyyy');
-    // callHistoryAPI(formattedDate, selectedValueToSend)
     setDateToSend(formattedDate);
     console.log('formated data--', formattedDate);
     filterArrayList(formattedDate, selectedValueToSend);
   };
     // This function is to get Clock in/out Hisotry data from server 
-    callHistoryAPI = async (date, selectedValueToSend) => {
-    var number = parseInt(userId);
+    callHistoryAPI = async (date, selectedValueToSend, item, userIdForAPI) => {
+        console.log('userID in post--', userIdForAPI);
+        
+    var number = parseInt(userIdForAPI, 10);
+    console.log('number--', number);
+    
     const requestOptions = {
       method: 'POST',
-      headers: { 
-        Authorization: 'Bearer ' + token,
+      headers: {
+        Authorization: 'Bearer ' + item,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -130,6 +143,7 @@ const EmployeesHistory = ({ navigation }) => {
       }),
     };
     console.log('=======requestOptions====== ' + requestOptions.body);
+    console.log('item in callHistoryAPI---', item);
     await fetch(BASE_URL + 'Attendance/GetAttendanceHistory', requestOptions)
       .then(response => {
         if (response.ok) {
@@ -418,22 +432,18 @@ const EmployeesHistory = ({ navigation }) => {
                   if (e === 0) {
                     setSelectedValue('All');
                     setSelectedValueTosend('All');
-                    // callHistoryAPI(dateToSend, 0);
                     filterArrayList(dateToSend, 'All');
                   } else if (e === 1) {
                     setSelectedValue('Approved');
-                    setSelectedValueTosend('Approved');
-                    // callHistoryAPI(dateToSend, 1);
+                    setSelectedValueTosend('Approved');                    
                     filterArrayList(dateToSend, 'Approved');
                   } else if (e === 2) {
                     setSelectedValue('Rejected');
                     setSelectedValueTosend('Rejected');
-                    // callHistoryAPI(dateToSend, 2);
                     filterArrayList(dateToSend, 'Rejected');
                   } else if (e === 3) {
                     setSelectedValue('Not Review');
                     setSelectedValueTosend('Pending');
-                    // callHistoryAPI(dateToSend, 3);
                     filterArrayList(dateToSend, 'Pending');
                   }
                 }}
